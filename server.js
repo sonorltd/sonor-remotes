@@ -13,7 +13,7 @@ const path = require('path');
 
 const drivers = require('./lib/drivers');
 
-const VERSION = '2.1.0';
+const VERSION = '2.2.0';
 const PORT = Number(process.env.PORT || 8049);
 const DATA = path.join(__dirname, 'remote.json');
 const LEGACY = path.join(__dirname, 'boxes.json');
