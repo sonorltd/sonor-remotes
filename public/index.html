@@ -15,6 +15,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
 <script src="./data/sonor-brand.js"></script>
 <script src="./data/sonor-header.js"></script>
+<script src="./data/sonor-app-auth.js"></script>  <!-- Android app: signs in as the engineer (gateway v1.17.0) -->
 <script src="./native.js"></script>
 <script src="./data/brands.js"></script>  <!-- maker marks (Simple Icons, CC0) -->  <!-- phone app only: direct TCP to the boxes -->
 <style>
@@ -144,6 +145,8 @@ main { display: block; max-width: 1100px; }
 <div id="sonor-header"></div>
 <div class="toolbar">
   <select id="bridgePick" hidden title="Which site's bridge (Pi) to use"></select>
+  <button id="appSign" hidden title="Sign in with your Sonor email, the same login as apps.sonor.co.uk on the Mac"></button>
+  <select id="projPick" hidden title="Project: names and rooms come from its Network Map plan"></select>
   <span class="hint" id="bridgeHint">Finds Sky, Denon / Marantz, Yamaha, Onkyo / Pioneer, LG, Samsung, Sony, Roku, Sonos and projectors on this network.</span>
   <button id="scanBtn" class="primary">Find devices</button>
 </div>
@@ -174,7 +177,7 @@ main { display: block; max-width: 1100px; }
 </main>
 <div class="toast" id="toast"></div>
 <script>
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.3.0';
 if (window.SonorHeader) {
   SonorHeader.init({ appName: 'Remotes', repo: 'sonor-remotes' });
   const v = document.getElementById('nav-version'); if (v) v.textContent = 'v' + APP_VERSION;
@@ -200,8 +203,10 @@ const RELAY = !DEMO && !window.SonorAgent && !window.SkyNative && (qs.has('relay
 let bridgeId = (() => { try { return localStorage.getItem('skyBridge'); } catch { return null; } })();
 let bridges = [];
 
+const AUTH = window.SonorAppAuth ? SonorAppAuth.init({ app: 'sky-remote' }) : { active: false, headers: async () => ({}), user: () => null };   // tablet app: the engineer's own session
+const SIGNED_IN = () => (AUTH.active ? !!AUTH.user() : /(^|\.)sonor\.co\.uk$/.test(location.hostname));
 async function rest(path, opts = {}) {
-  const r = await fetch(REST + path, { ...opts, headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+  const r = await fetch(REST + path, { ...opts, headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, ...(AUTH.active ? await AUTH.headers() : {}), 'Content-Type': 'application/json', ...(opts.headers || {}) } });
   const t = await r.text(); const j = t ? JSON.parse(t) : null;
   if (!r.ok) throw new Error((j && (j.message || j.error)) || r.statusText);
   return j;
@@ -305,7 +310,38 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 
 // ── Device list ──
 const KIND_ORDER = ['TV', 'Projector', 'AV receiver', 'Satellite', 'Streamer', 'Speaker'];
-const title = (d) => d.name || `${d.make} ${d.model}`.trim();
+// ── Workspace link (2.3.0): the project's Network Map plan names the devices and lists what should be here ──
+// network_configs is the one source of device names / rooms (Network Map, Network Scanner use the same rows). Signed-in pages only.
+let nm = null; // { pid, devices:[{ ip, mac, label, room, device, service }] }
+const normMac = (m) => { const h = String(m || '').replace(/[^0-9a-f]/gi, '').toUpperCase(); return h.length === 12 ? h.match(/../g).join(':') : ''; };
+function planIp(cfg, d) { const o = String(d.lastOctet || '').trim(); if (!o) return ''; const v = (cfg.vlans || []).find((x) => String(x.id) === String(d.vlan || 1)); const parts = String(cfg.subnet || '192.168.1').split('.'); return v && v.tag !== undefined && v.tag !== '' ? `${parts[0]}.${parts[1]}.${v.tag}.${o}` : `${cfg.subnet}.${o}`; }
+const nmMatch = (d) => nm && (nm.devices.find((p) => p.mac && normMac(d.mac) === p.mac) || nm.devices.find((p) => p.ip && p.ip === d.ip));
+async function loadProjects() {
+  if (DEMO || !SIGNED_IN()) return;
+  try {
+    const rows = await rest('/network_configs?select=project_id,updated_at,projects(name,ref)&order=updated_at.desc&limit=200');
+    if (!rows.length) return;
+    const last = (() => { try { return localStorage.getItem('remotesProject') || ''; } catch { return ''; } })();
+    $('#projPick').innerHTML = '<option value="">Project…</option>' + rows.map((r) => `<option value="${esc(r.project_id)}">${esc([r.projects && r.projects.ref, r.projects && r.projects.name].filter(Boolean).join(' · ') || r.project_id)}</option>`).join('');
+    $('#projPick').hidden = false; if (last && rows.some((r) => r.project_id === last)) { $('#projPick').value = last; loadPlan(last); }
+  } catch { /* not signed in: the remote still works, just without project names */ }
+}
+async function loadPlan(pid) {
+  try { localStorage.setItem('remotesProject', pid || ''); } catch {}
+  if (!pid) { nm = null; render(); return; }
+  try {
+    const [row] = await rest(`/network_configs?project_id=eq.${pid}&select=config`); const cfg = (row && row.config) || {};
+    nm = { pid, devices: (cfg.devices || []).filter((d) => d.takeoffStatus !== 'removed').map((d) => ({ ip: planIp(cfg, d), mac: normMac(d.mac), room: d.room || d.location || '', device: d.device || '', service: d.service || '', make: (String(d.notes || '').split('·')[1] || '').trim(), label: [d.room || d.location, d.device].filter(Boolean).join(' · ') })) };
+    render();
+  } catch (e) { toast('Could not load the Network Map plan: ' + e.message, true); }
+}
+const PLAN_SVCS = new Set(['video', 'audio', 'cinema', 'control']);
+function plannedMissing() { if (!nm) return []; const have = new Set((state.devices || []).map((d) => d.ip)); return nm.devices.filter((p) => p.ip && PLAN_SVCS.has(p.service) && !have.has(p.ip)); }
+function reportVersion() { // the Hub reads app_versions for live versions (same upsert as sonor-platform.js)
+  if (DEMO || !SIGNED_IN()) return;
+  rest('/app_versions?on_conflict=app_key', { method: 'POST', headers: { Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ app_key: 'sky-remote', version: APP_VERSION, app_name: 'Remotes', repo: 'sonor-remotes', last_seen: new Date().toISOString() }) }).catch(() => {});
+}
+const title = (d) => d.name || ((nmMatch(d) || {}).label) || `${d.make} ${d.model}`.trim();
 const sub = (d) => [d.ip, d.make && d.model && !String(d.model).startsWith(d.make) ? `${d.make} ${d.model}` : d.model || d.make].filter(Boolean).join(' · ');
 const pow = (d) => (d.state && d.state.power) || d.power || 'unknown';
 const BRAND_KEYS = [['sky', 'sky'], ['lg', 'lg'], ['samsung', 'samsung'], ['sony', 'sony'], ['roku', 'roku'], ['sonos', 'sonos'], ['denon', 'denon'], ['yamaha', 'yamaha'], ['epson', 'epson'], ['panasonic', 'panasonic'], ['nec', 'nec'], ['apple tv', 'appletv'], ['apple', 'apple'], ['chromecast', 'chromecast'], ['google', 'chromecast'], ['bose', 'bose']];
@@ -337,10 +373,11 @@ function renderList() {
   list.innerHTML = devs.map((d) => `
     <div class="card" data-ip="${esc(d.ip)}" role="button" tabindex="0" style="--kc:${kc(d.kind)}">
       ${logo(d)}
-      <div class="meta"><div class="name">${esc(title(d))}</div><div class="sub">${esc(d.kind)}${d.model && d.name ? ' · ' + esc(d.model) : ''}</div><div class="sub ip">${esc(d.ip)}</div></div>
+      <div class="meta"><div class="name">${esc(title(d))}</div><div class="sub">${esc(d.kind)}${d.model && d.name ? ' · ' + esc(d.model) : ''}</div><div class="sub ip">${esc(d.ip)}${nmMatch(d) ? ' · <span title="Named from the project\'s Network Map">in plan</span>' : nm ? ' · <span style="color:var(--warn)" title="Not in the project\'s Network Map">not in plan</span>' : ''}</div></div>
       <span class="dot ${esc(pow(d))}" title="${esc(pow(d))}"></span>
       ${d.caps && d.caps.pairable && !d.caps.paired ? '<span class="tag pair">pair</span>' : d.caps && !d.caps.keys.length ? '<span class="tag">no IP control</span>' : ''}
-    </div>`).join('');
+    </div>`).join('') + (() => { const miss = plannedMissing(); return miss.length ? `<div class="empty" style="grid-column:1/-1;text-align:left"><b>In the Network Map plan but not found here (${miss.length})</b><div class="muted" style="margin:4px 0 8px">Switched off, on another VLAN, or not installed yet. Add one by IP to try it.</div>${miss.map((p) => `<div class="row" style="gap:8px;margin:4px 0"><span style="flex:1">${esc(p.label || p.device)} <span class="muted">${esc(p.ip)}</span></span><button data-addplan="${esc(p.ip)}">Add</button></div>`).join('')}</div>` : ''; })();
+  list.querySelectorAll('[data-addplan]').forEach((b) => b.onclick = async (e) => { e.stopPropagation(); b.disabled = true; try { const r = await api('/api/add', { ip: b.dataset.addplan }); toast('Added ' + title(r.device)); refresh(); } catch (err) { b.disabled = false; toast(err.message, true); } });
   list.querySelectorAll('.card').forEach((el) => { const open = () => { sel = el.dataset.ip; remember(sel); setView('remote'); try { history.pushState({ remote: 1 }, ''); } catch {} render(); if (!DEMO) api('/api/status', { ip: sel }).then(() => refresh()).catch(() => {}); }; el.onclick = open; el.onkeydown = (e) => { if (e.key === 'Enter') open(); }; });
 }
 
@@ -417,6 +454,7 @@ async function send(keys) {
 
 $('#backBtn').onclick = () => { if (history.state && history.state.remote) history.back(); else { setView('list'); render(); } };
 window.addEventListener('popstate', () => { if ($('#views').dataset.view === 'remote') { setView('list'); render(); } });
+$('#projPick').onchange = (e) => loadPlan(e.target.value);
 $('#bridgePick').onchange = (e) => { bridgeId = e.target.value; try { localStorage.setItem('skyBridge', bridgeId); } catch {} refresh(); };
 $('#scanBtn').onclick = async () => { try { await api('/api/scan', {}); poll(); } catch (e) { toast(e.message, true); } };
 $('#scanSub').onclick = async () => { const subnets = $('#subnets').value.split(/[ ,]+/).filter(Boolean); if (!subnets.length) return toast('Enter a subnet', true); try { await api('/api/scan', { subnets }); poll(); } catch (e) { toast(e.message, true); } };
@@ -435,7 +473,13 @@ document.addEventListener('keydown', (e) => {
 });
 
 if (DEMO) $('#demoBanner').hidden = false;
-refresh();
+refresh(); loadProjects(); reportVersion();
+function renderSign() {
+  const b = $('#appSign'); if (!AUTH.active) return; const u = AUTH.user(); b.hidden = false;
+  b.textContent = u ? (u.email.split('@')[0] || 'Signed in') + ' · Sign out' : 'Sign in';
+  b.onclick = () => { if (!AUTH.user()) return AUTH.signIn(); if (confirm(`Sign ${u.email} out of this tablet?`)) { AUTH.signOut(); renderSign(); } };
+}
+if (AUTH.active) { renderSign(); AUTH.onChange(() => { renderSign(); if (AUTH.user()) { toast('Signed in as ' + AUTH.user().email); loadProjects(); reportVersion(); } }); }
 setInterval(() => { if (!document.hidden && !(state.scan || {}).running && !DEMO) refresh(); }, 15000);
 </script>
 </body>

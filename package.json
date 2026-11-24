@@ -1,6 +1,6 @@
 {
   "name": "sonor-remotes",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Find Sky boxes on the LAN and control them over IP (Sky Q, Sky Q Mini, Sky+HD).",
   "main": "server.js",
   "scripts": { "start": "node server.js", "test": "node test/test.js" },
