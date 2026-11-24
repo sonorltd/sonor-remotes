@@ -1,6 +1,6 @@
 {
   "appId": "uk.co.sonor.skyremote",
-  "appName": "Sky Remote",
+  "appName": "Remotes",
   "webDir": "www",
   "server": { "androidScheme": "http", "cleartext": true },
   "android": { "allowMixedContent": true },

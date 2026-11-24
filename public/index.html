@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1C1C1E">
-<title>Sky Remote · Sonor</title>
+<title>Remotes · Sonor</title>
 <link rel="icon" type="image/svg+xml" href="./data/favicon.svg">
 <script src="data/sonor-theme.js"></script>  <!-- sonor-platform §2: theme FIRST (graphite default) -->
 <link rel="stylesheet" href="./data/brand.css">
@@ -15,7 +15,8 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
 <script src="./data/sonor-brand.js"></script>
 <script src="./data/sonor-header.js"></script>
-<script src="./native.js"></script>  <!-- phone app only: direct TCP to the boxes -->
+<script src="./native.js"></script>
+<script src="./data/brands.js"></script>  <!-- maker marks (Simple Icons, CC0) -->  <!-- phone app only: direct TCP to the boxes -->
 <style>
 :root, [data-theme] {
   /* Map to brand tokens (brand.css). Fallbacks keep it usable if brand.css fails to load. */
@@ -58,7 +59,7 @@ main { display: grid; grid-template-columns: minmax(260px, 360px) 1fr; gap: 16px
 .remote .title { text-align: center; }
 .remote .title .name { font-weight: 700; font-size: 17px; }
 .g { display: grid; gap: 8px; }
-.g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+.g1 { grid-template-columns: 1fr; } .g2 { grid-template-columns: repeat(2, 1fr); } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
 .remote button { padding: 12px 6px; font-size: 14px; border-radius: 12px; }
 .dpad { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 58px); gap: 6px; }
 .dpad button { font-size: 20px; }
@@ -72,92 +73,117 @@ main { display: grid; grid-template-columns: minmax(260px, 360px) 1fr; gap: 16px
 .empty { text-align: center; padding: 30px 10px; color: var(--muted); }
 details { margin-top: 10px; } summary { cursor: pointer; color: var(--muted); font-size: 13px; }
 kbd { font-size: 11px; background: var(--line); padding: 1px 5px; border-radius: 4px; }
+
+.grp { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 12px 4px 4px; font-family: var(--font-mono, "DM Mono", monospace); }
+.mk { font-size: 11px; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.tag.pair { background: rgba(227,167,47,.18); color: var(--warn); }
+.stat { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.stat b { color: var(--text); font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { padding: 8px 10px; font-size: 13px; border-radius: 99px; }
+.chips button.on { border-color: var(--accent-c); background: color-mix(in srgb, var(--accent-c) 25%, var(--panel2)); }
+.sect { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-top: 4px; font-family: var(--font-mono, "DM Mono", monospace); }
+.pairbox { border: 1px solid var(--warn); background: rgba(227,167,47,.08); border-radius: 12px; padding: 12px; display: grid; gap: 8px; font-size: 13.5px; }
+.note { font-size: 12.5px; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+input[type=range] { width: 100%; accent-color: var(--accent-c); }
+
+/* v2.1.0 Engineering look: graphite, square-ish, DM Mono labels, service colour per kind (03 Video, 02 Audio, 01 Cinema) */
+:root { --mono: var(--font-mono, "DM Mono", ui-monospace, Menlo, monospace); --s-cinema: #8058a1; --s-audio: #4bb9d3; --s-video: #78ba57; --edge: #3A3A3C; --card: #242426; --card2: #2C2C2E; --label: #8E8E93; }
+.panel { border-radius: 6px; background: transparent; border: 0; padding: 0; }
+.panel h2, .dhead h2 { font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .18em; color: var(--label); }
+.toolbar { background: var(--bg); border-bottom-color: var(--edge); }
+button { border-radius: 4px; } button.primary, #scanBtn { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; }
+.kinds { gap: 2px; border-bottom: 1px solid var(--edge); margin-bottom: 14px; overflow-x: auto; flex-wrap: nowrap !important; scrollbar-width: none; }
+.kinds button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 11px 12px 9px; color: #636366; font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; white-space: nowrap; }
+.kinds button .code { color: var(--kc, var(--label)); margin-right: 6px; }
+.kinds button.on { color: var(--text); background: none !important; border-radius: 0 !important; border-color: transparent; border-bottom-color: var(--kc, var(--accent-c)); }
+.kinds button i { font-style: normal; color: var(--label); margin-left: 6px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.stats div { background: var(--card); border: 1px solid var(--edge); border-left: 4px solid var(--kc, var(--edge)); border-radius: 6px; padding: 8px 12px; }
+.stats b { display: block; font-size: 20px; font-weight: 600; } .stats span { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--label); }
+.card { border-radius: 6px; background: var(--card); border-color: var(--edge); border-left: 4px solid var(--kc, var(--edge)); }
+.card:hover { border-color: var(--kc, var(--accent-c)); background: var(--card2); }
+.card .sub.ip { font-family: var(--mono); font-size: 11.5px; letter-spacing: .04em; }
+.logo { border-radius: 8px; }
+.rhead .back { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+#remotePanel { background: var(--card); border: 1px solid var(--edge); border-radius: 6px; padding: 18px 14px; border-top: 3px solid var(--kc, var(--edge)); }
+.remote button { border-radius: 6px; }
+.sect, .grp { letter-spacing: .16em; }
+
+/* v2.1.0: Discovered first, then the remote */
+main { display: block; max-width: 1100px; }
+.views[data-view="list"] #viewRemote, .views[data-view="remote"] #viewList { display: none; }
+.dhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.dhead h2 { margin: 0 !important; }
+.kinds { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.kinds button { padding: 6px 12px; font-size: 13px; border-radius: 99px; }
+.kinds button.on { border-color: var(--accent-c); background: color-mix(in srgb, var(--accent-c) 25%, var(--panel2)); }
+.kinds button i { font-style: normal; color: var(--muted); margin-left: 4px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.card { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel2); cursor: pointer; text-align: left; position: relative; }
+.card:hover { border-color: var(--accent-c); }
+.card .meta { flex: 1; min-width: 0; }
+.card .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .sub { color: var(--muted); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .dot { position: absolute; top: 10px; right: 10px; }
+.card .tag { position: absolute; bottom: 8px; right: 10px; }
+.logo { width: 52px; height: 52px; flex: none; border-radius: 12px; background: #1a1a1c; border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; position: relative; }
+.logo::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--bc, transparent); }
+.logo svg { width: 30px; height: 30px; fill: #f5f5f7; }
+.logo.wide svg { width: 40px; }
+.logo .wm { font-family: var(--font-mono, "DM Mono", monospace); font-size: 10px; letter-spacing: .06em; font-weight: 600; text-transform: uppercase; color: #f5f5f7; text-align: center; line-height: 1.1; padding: 0 3px; }
+.logo.big { width: 64px; height: 64px; border-radius: 16px; } .logo.big svg { width: 38px; height: 38px; }
+.rhead { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.rhead .back { padding: 8px 12px; }
+.rtitle { display: flex; gap: 12px; align-items: center; justify-content: center; }
+.rtitle .name { font-weight: 700; font-size: 17px; }
+
 </style>
 </head>
 <body>
 <div id="sonor-header"></div>
 <div class="toolbar">
   <select id="bridgePick" hidden title="Which site's bridge (Pi) to use"></select>
-  <span class="hint" id="bridgeHint">Finds Sky Q, Sky Q Mini and Sky+HD boxes on this network.</span>
-  <button id="scanBtn" class="primary">Find boxes</button>
+  <span class="hint" id="bridgeHint">Finds Sky, Denon / Marantz, Yamaha, Onkyo / Pioneer, LG, Samsung, Sony, Roku, Sonos and projectors on this network.</span>
+  <button id="scanBtn" class="primary">Find devices</button>
 </div>
-<div id="demoBanner" hidden style="margin:12px 16px 0;padding:10px 14px;border:1px solid #8058a1;background:rgba(128,88,161,.15);border-radius:10px;font-size:13px"><b>Demo:</b> four sample Sky boxes. Keys are shown, not sent. On site, use the Android app or the Pi bridge.</div>
-<main>
-  <section>
+<div id="demoBanner" hidden style="margin:12px 16px 0;padding:10px 14px;border:1px solid #8058a1;background:rgba(128,88,161,.15);border-radius:10px;font-size:13px"><b>Demo:</b> a sample house. Keys are shown, not sent. On site, use the Android app or the Pi bridge.</div>
+<main class="views" id="views" data-view="list">
+  <section id="viewList">
     <div class="panel">
-      <h2>Boxes on the network</h2>
-      <div id="scanState" class="muted"></div>
+      <div class="dhead"><h2>Discovered</h2><span id="scanState" class="muted"></span></div>
       <div class="progress" id="prog" hidden><div></div></div>
-      <div id="list"></div>
+      <div class="stats" id="stats"></div>
+      <div class="kinds" id="kinds"></div>
+      <div class="cards" id="list"></div>
       <details>
         <summary>Add by IP or scan another subnet</summary>
-        <div class="row" style="margin-top:10px"><input id="addIp" placeholder="192.168.1.50" inputmode="decimal"><button id="addBtn">Add</button></div>
+        <div class="row" style="margin-top:10px"><input id="addIp" placeholder="192.168.1.50" inputmode="decimal"><select id="addDrv"><option value="">Work it out</option></select><button id="addBtn">Add</button></div>
         <div class="row" style="margin-top:8px"><input id="subnets" placeholder="Extra subnets, e.g. 192.168.20.0, 10.0.5.0"><button id="scanSub">Scan</button></div>
-        <p class="muted">The scan checks the subnets the bridge (this computer or the site Pi) is on. Sky boxes on a separate VLAN need that subnet entered here, and the network must route to it.</p>
+        <p class="muted">The scan knocks on each address's control ports (Telnet 23, web 80, Sonos 1400, LG 3000/3001, PJLink 4352, Sky 49160/5900, Samsung 8001/8002, Roku 8060, JVC 20554, Onkyo 60128) and asks each answer what it is. Devices on another VLAN need that subnet entered here, and the network must route to it.</p>
       </details>
     </div>
   </section>
-  <section>
+  <section id="viewRemote">
+    <div class="rhead"><button class="back" id="backBtn">‹ All devices</button><span class="muted" id="rCount"></span></div>
     <div class="panel" id="remotePanel">
-      <div class="empty" id="noSel">Pick a box on the left, or press <b>Find boxes</b>.</div>
-      <div class="remote" id="remote" hidden>
-        <div class="title">
-          <div class="name" id="rName"></div>
-          <div class="muted" id="rSub"></div>
-        </div>
-        <div class="g g3">
-          <button data-k="power" class="power">⏻ Power</button>
-          <button data-k="sky" class="sky">sky</button>
-          <button data-k="home">Home</button>
-        </div>
-        <div class="g g3">
-          <button data-k="search">Search</button>
-          <button data-k="sidebar">Sidebar</button>
-          <button data-k="i">i</button>
-        </div>
-        <div class="dpad">
-          <span></span><button data-k="up">▲</button><span></span>
-          <button data-k="left">◀</button><button data-k="select" class="ok">OK</button><button data-k="right">▶</button>
-          <span></span><button data-k="down">▼</button><span></span>
-        </div>
-        <div class="g g3">
-          <button data-k="backup">Back</button>
-          <button data-k="channelup">CH ▲</button>
-          <button data-k="help">Help</button>
-          <button data-k="text">Text</button>
-          <button data-k="channeldown">CH ▼</button>
-          <button data-k="dismiss">Dismiss</button>
-        </div>
-        <div class="g g4">
-          <button data-k="rewind">⏪</button><button data-k="play">▶</button><button data-k="pause">⏸</button><button data-k="fastforward">⏩</button>
-          <button data-k="stop">⏹</button><button data-k="record" style="color:#ff6b6b">⏺</button><button data-k="tvguide">Guide</button><button data-k="boxoffice">Box Off.</button>
-        </div>
-        <div class="g g4">
-          <button data-k="red" class="c-red">&nbsp;</button><button data-k="green" class="c-green">&nbsp;</button>
-          <button data-k="yellow" class="c-yellow">&nbsp;</button><button data-k="blue" class="c-blue">&nbsp;</button>
-        </div>
-        <div class="g g3" id="digits"></div>
-        <div class="row"><input id="chan" placeholder="Channel number, e.g. 401" inputmode="numeric"><button id="chanGo" class="primary">Go</button></div>
-        <div class="row" style="justify-content:space-between">
-          <button id="refresh">Refresh status</button><button id="rename">Rename</button><button id="remove">Remove</button>
-        </div>
-        <p class="muted" style="text-align:center">Keyboard: arrows, <kbd>Enter</kbd> OK, <kbd>Backspace</kbd> back, <kbd>0-9</kbd>, <kbd>P</kbd> power, <kbd>H</kbd> home, <kbd>Space</kbd> play/pause</p>
-      </div>
+      <div class="empty" id="noSel">Pick a device.</div>
+      <div class="remote" id="remote" hidden></div>
     </div>
   </section>
 </main>
 <div class="toast" id="toast"></div>
 <script>
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '2.1.0';
 if (window.SonorHeader) {
-  SonorHeader.init({ appName: 'Sky Remote', repo: 'sonor-sky-remote' });
+  SonorHeader.init({ appName: 'Remotes', repo: 'sonor-remotes' });
   const v = document.getElementById('nav-version'); if (v) v.textContent = 'v' + APP_VERSION;
 }
 function bridgeState(ok, text) { if (window.SonorHeader) SonorHeader.updateDbStatus(ok ? 'live' : 'error', text); }
 const $ = (s) => document.querySelector(s);
-let state = { boxes: [], scan: {} };
-let sel = (() => { try { return localStorage.getItem('skySel'); } catch { return null; } })();
-let paused = false;
+let state = { devices: [], scan: {}, drivers: [] };
+let sel = null; // v2.1.0: always open on Discovered
+const remember = (ip) => { try { localStorage.setItem('remoteSel', ip || ''); } catch {} };
 
 // ── Transport ───────────────────────────────────────────
 // LOCAL: the page is served by the bridge itself (Pi / laptop on site) → /api/* on the same origin.
@@ -170,7 +196,7 @@ const qs = new URLSearchParams(location.search);
 const isLocalHost = ['localhost', '127.0.0.1'].includes(location.hostname);
 const REST = ((isLocalHost && qs.get('rest')) || SB_URL) + '/rest/v1';
 const DEMO = qs.has('demo');
-const RELAY = !DEMO && !window.SkyNative && (qs.has('relay') || /(^|\.)sonor\.co\.uk$/.test(location.hostname) || location.hostname.endsWith('github.io'));
+const RELAY = !DEMO && !window.SonorAgent && !window.SkyNative && (qs.has('relay') || /(^|\.)sonor\.co\.uk$/.test(location.hostname) || location.hostname.endsWith('github.io'));
 let bridgeId = (() => { try { return localStorage.getItem('skyBridge'); } catch { return null; } })();
 let bridges = [];
 
@@ -205,113 +231,199 @@ async function relayCall(action, payload) {
 }
 
 
-// ── Demo (?demo=1): four sample boxes, keys are shown instead of sent. Nothing touches a network. ──
-const demoState = { boxes: [
-  { ip: '192.168.1.35', name: 'Lounge Sky Q', model: 'Sky Q 2TB', hardware: 'ES240', power: 'on', port: 49160, controllable: true, notes: [] },
-  { ip: '192.168.1.36', name: 'Master Bedroom', model: 'Sky Q Mini', hardware: 'EM150', power: 'standby', port: 49160, controllable: true, notes: [] },
-  { ip: '192.168.1.37', name: 'Snug Sky+HD', model: 'Sky+HD', hardware: 'DRX890', power: 'on', port: 5900, controllable: true, notes: ['No status on Sky+HD, keys only.'] },
-  { ip: '192.168.1.38', name: 'Kitchen Sky Stream', model: 'Sky Stream', hardware: 'Puck', power: 'on', port: 0, controllable: false, notes: [] },
-], scan: { running: false, lastResult: { found: 4, subnets: ['192.168.1'] } } };
+
+// ── Demo (?demo=1): a sample house; keys are shown, not sent. Nothing touches a network. ──
+const NAV = ['up', 'down', 'left', 'right', 'select', 'back', 'home', 'menu', 'info'], TR = ['play', 'pause', 'stop', 'rew', 'ff'], DG = '0123456789'.split(''), CL = ['red', 'green', 'yellow', 'blue'];
+const demoDevices = [
+  { ip: '192.168.1.30', driver: 'lg', make: 'LG', kind: 'TV', model: 'OLED65C3', name: 'Lounge TV', paired: true, state: { power: 'on', volume: 12 }, caps: { keys: ['power', 'poweron', 'poweroff', ...NAV, 'guide', 'exit', 'volup', 'voldown', 'mute', 'chup', 'chdown', ...TR, ...DG, ...CL], inputs: [['HDMI_1', 'Sky Q'], ['HDMI_2', 'Apple TV'], ['HDMI_3', 'HDMI 3']], pairable: true, paired: true, note: 'Turning on needs Wake-on-LAN: on the TV set "Turn on via Wi-Fi".' } },
+  { ip: '192.168.1.32', driver: 'samsung', make: 'Samsung', kind: 'TV', model: 'QE65S95CATXXU', name: 'Master Bedroom TV', paired: false, needsPair: true, state: { power: 'on' }, caps: { keys: ['power', 'poweron', ...NAV, 'guide', 'exit', 'volup', 'voldown', 'mute', 'chup', 'chdown', ...TR, ...DG, ...CL, 'source'], inputs: [['KEY_HDMI1', 'HDMI 1'], ['KEY_HDMI2', 'HDMI 2']], pairable: true, paired: false, note: 'First use: press Pair and choose Allow on the TV.' } },
+  { ip: '192.168.1.31', driver: 'sony', make: 'Sony', kind: 'TV', model: 'XR-65A95L', name: 'Snug TV', paired: false, needsPair: true, state: { power: 'standby' }, caps: { keys: ['power', 'poweron', 'poweroff', ...NAV, 'volup', 'voldown', 'mute', 'chup', 'chdown', ...TR, ...DG, ...CL, 'source'], volume: { min: 0, max: 100 }, inputs: [], pairable: true, pairField: 'Pre-Shared Key (TV: Network > IP control)', paired: false } },
+  { ip: '192.168.1.40', driver: 'denon', make: 'Denon', kind: 'AV receiver', model: 'AVC-X6800H', name: 'Cinema AVR', paired: false, state: { power: 'on', volume: 45, input: 'BD', mode: 'AUTO' }, caps: { keys: ['power', 'poweron', 'poweroff', 'volup', 'voldown', 'mute', 'up', 'down', 'left', 'right', 'select', 'back', 'menu', 'info', 'zone2on', 'zone2off'], volume: { min: 0, max: 98 }, inputs: [['BD', 'Blu-ray'], ['SAT/CBL', 'Sky / CBL'], ['GAME', 'Game'], ['MPLAY', 'Media player'], ['TV', 'TV audio'], ['NET', 'HEOS / Network']], modes: [['AUTO', 'Auto'], ['STEREO', 'Stereo'], ['DIRECT', 'Direct'], ['MOVIE', 'Movie']], note: 'Only one Telnet control can be connected at a time.' } },
+  { ip: '192.168.1.41', driver: 'yamaha', make: 'Yamaha', kind: 'AV receiver', model: 'RX-A8A', name: 'Kitchen AVR', paired: false, state: { power: 'standby', volume: 80, input: 'net_radio' }, caps: { keys: ['power', 'poweron', 'poweroff', 'volup', 'voldown', 'mute', 'up', 'down', 'left', 'right', 'select', 'back', 'menu', 'play', 'pause', 'stop', 'prev', 'next'], volume: { min: 0, max: 161 }, inputs: [['hdmi1', 'HDMI 1'], ['hdmi2', 'HDMI 2'], ['net_radio', 'Net radio'], ['bluetooth', 'Bluetooth']], modes: [['straight', 'straight'], ['surr_decoder', 'surr decoder']] } },
+  { ip: '192.168.1.42', driver: 'pjlink', make: 'EPSON', kind: 'Projector', model: 'EH-LS12000B', name: 'Cinema projector', paired: true, state: { power: 'standby', input: '31', lamp: '1234 h' }, caps: { keys: ['power', 'poweron', 'poweroff', 'mute'], inputs: [['31', 'HDMI 1'], ['32', 'HDMI 2']], pairable: false, paired: true, note: 'PJLink covers power, input and picture mute.' } },
+  { ip: '192.168.1.35', driver: 'sky', make: 'Sky', kind: 'Satellite', model: 'Sky Q 2TB', name: 'Lounge Sky Q', paired: false, state: { power: 'on' }, caps: { keys: ['power', ...NAV.filter((k) => k !== 'menu'), 'menu', 'guide', 'chup', 'chdown', ...TR, 'rec', 'search', 'text', 'sky', 'boxoffice', ...DG, ...CL], inputs: [], note: 'Volume is on the TV or receiver.' } },
+  { ip: '192.168.1.45', driver: 'roku', make: 'Roku', kind: 'Streamer', model: 'Roku Ultra 4850X', name: 'Gym Roku', paired: false, state: { power: 'on' }, caps: { keys: ['power', 'poweron', 'poweroff', 'up', 'down', 'left', 'right', 'select', 'back', 'home', 'info', 'play', 'rew', 'ff', 'replay', 'search'], inputs: [] } },
+  { ip: '192.168.1.50', driver: 'sonos', make: 'Sonos', kind: 'Speaker', model: 'Sonos Arc', name: 'Lounge', paired: false, state: { power: 'on', volume: 22 }, caps: { keys: ['play', 'pause', 'prev', 'next', 'volup', 'voldown', 'mute'], volume: { min: 0, max: 100 }, inputs: [] } },
+];
+const demoState = { devices: demoDevices, scan: { running: false, lastResult: { found: demoDevices.length, subnets: ['192.168.1'], answered: 14 } }, drivers: [['sky', 'Sky'], ['denon', 'Denon / Marantz'], ['yamaha', 'Yamaha'], ['onkyo', 'Onkyo / Pioneer'], ['lg', 'LG'], ['samsung', 'Samsung'], ['sony', 'Sony'], ['roku', 'Roku'], ['sonos', 'Sonos'], ['pjlink', 'Projector (PJLink)'], ['jvc', 'JVC']].map(([id, make]) => ({ id, make })) };
 async function demoApi(action, data = {}) {
   await sleepMs(120);
-  const b = demoState.boxes.find((x) => x.ip === data.ip);
+  const d = demoState.devices.find((x) => x.ip === data.ip);
   switch (action) {
-    case 'boxes': return demoState;
-    case 'key': toast('Demo: would send ' + data.keys.join(' ') + ' to ' + (b ? b.name : data.ip)); if (b && data.keys.includes('power')) b.power = b.power === 'on' ? 'standby' : 'on'; return { ok: true };
-    case 'scan': demoState.scan = { running: true, done: 0, total: 254 }; (async () => { for (let i = 0; i <= 254; i += 32) { demoState.scan.done = i; await sleepMs(150); } demoState.scan = { running: false, lastResult: { found: 4, subnets: data.subnets || ['192.168.1'] } }; })(); return { started: true };
-    case 'status': return { box: b };
-    case 'rename': if (b) b.name = data.name; return { ok: true };
-    case 'remove': demoState.boxes = demoState.boxes.filter((x) => x !== b); return { ok: true };
-    case 'add': { const nb = { ip: data.ip || '192.168.1.40', name: '', model: 'Sky Q 1TB', hardware: 'ES140', power: 'on', port: 49160, controllable: true, notes: [] }; demoState.boxes.push(nb); return { box: nb }; }
+    case 'devices': case 'boxes': return demoState;
+    case 'key': { const k = [].concat(data.keys).join(' '); toast(`Demo: would send ${k} to ${d ? d.name : data.ip}`);
+      if (d && /^power/.test(k)) d.state.power = k === 'poweroff' || (k === 'power' && d.state.power === 'on') ? 'standby' : 'on';
+      if (d && k.startsWith('vol:')) d.state.volume = Number(k.slice(4)); if (d && k.startsWith('input:')) d.state.input = k.slice(6); if (d && k.startsWith('mode:')) d.state.mode = k.slice(5); return { ok: true }; }
+    case 'pair': await sleepMs(900); d.paired = true; d.needsPair = false; d.caps.paired = true; return { device: d };
+    case 'scan': demoState.scan = { running: true, done: 0, total: 254, phase: 'sweep' }; (async () => { for (let i = 0; i <= 254; i += 32) { demoState.scan.done = i; await sleepMs(150); } demoState.scan = { running: false, lastResult: { found: demoState.devices.length, subnets: data.subnets || ['192.168.1'], answered: 14 } }; })(); return { started: true };
+    case 'status': return { device: d };
+    case 'rename': if (d) d.name = data.name; return { device: d };
+    case 'remove': demoState.devices = demoState.devices.filter((x) => x !== d); return { ok: true };
+    case 'setmac': return { device: d };
+    case 'add': throw new Error('Demo: adding by IP needs a real network');
   }
   throw new Error('Not in the demo');
 }
+
 async function api(path, data) {
   const action = path.replace(/^\/api\//, '');
   if (DEMO) return demoApi(action, data);
-  if (window.SkyNative) return window.SkyNative.call(action, data);
+  if (window.SonorAgent) return window.SonorAgent.api(action, data); // Android app: the engine runs on the tablet
   if (RELAY) {
-    if (action === 'boxes') {
+    if (action === 'devices') {
       await loadBridges();
       const b = bridges.find((x) => x.id === bridgeId);
-      if (!b) return { boxes: [], scan: {}, subnets: [] };
+      if (!b) return { devices: [], scan: {}, subnets: [] };
       const [full] = await rest(`/v_sky_bridges?id=eq.${b.id}&select=state,online,last_seen`);
       $('#bridgeHint').textContent = full.online ? `Bridge online · v${b.version || '?'}` : `Bridge offline (last seen ${ago(full.last_seen)})`;
       bridgeState(full.online, full.online ? b.name : 'Bridge offline');
-      return { boxes: [], scan: {}, ...(full.state || {}), offline: !full.online };
+      const st = full.state || {};
+      return { devices: st.devices || (st.boxes || []).map((x) => ({ ...x, driver: 'sky', make: 'Sky', kind: 'Satellite', caps: { keys: ['power', 'up', 'down', 'left', 'right', 'select', 'back', 'home', 'guide', 'info', 'chup', 'chdown', 'play', 'pause', ...DG, ...CL], inputs: [] } })), scan: st.scan || {}, drivers: st.drivers || [], offline: !full.online };
     }
     return relayCall(action, data);
   }
   const r = await fetch(path, data === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.error || r.statusText);
+  if (!r.ok) throw Object.assign(new Error(j.error || r.statusText), { needsPair: j.needsPair });
   return j;
 }
-function toast(msg, err) { const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(t._h); t._h = setTimeout(() => t.className = 'toast', 2200); }
+function toast(msg, err) { const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(t._h); t._h = setTimeout(() => t.className = 'toast', 2600); }
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-function render() {
-  const list = $('#list');
-  if (!state.boxes.length) list.innerHTML = '<div class="empty">No boxes yet.</div>';
-  else list.innerHTML = state.boxes.map((b) => `
-    <div class="box ${b.ip === sel ? 'sel' : ''}" data-ip="${esc(b.ip)}">
-      <span class="dot ${esc(b.power)}" title="${esc(b.power)}"></span>
-      <div class="meta"><div class="name">${esc(b.name || b.model)}</div>
-      <div class="sub">${esc(b.ip)} · ${esc(b.name ? b.model : (b.hardware || ''))}</div></div>
-      ${b.controllable ? '' : `<span class="tag">${/Stream/.test(b.model) ? 'found · no IP control yet' : 'no remote port'}</span>`}
+// ── Device list ──
+const KIND_ORDER = ['TV', 'Projector', 'AV receiver', 'Satellite', 'Streamer', 'Speaker'];
+const title = (d) => d.name || `${d.make} ${d.model}`.trim();
+const sub = (d) => [d.ip, d.make && d.model && !String(d.model).startsWith(d.make) ? `${d.make} ${d.model}` : d.model || d.make].filter(Boolean).join(' · ');
+const pow = (d) => (d.state && d.state.power) || d.power || 'unknown';
+const BRAND_KEYS = [['sky', 'sky'], ['lg', 'lg'], ['samsung', 'samsung'], ['sony', 'sony'], ['roku', 'roku'], ['sonos', 'sonos'], ['denon', 'denon'], ['yamaha', 'yamaha'], ['epson', 'epson'], ['panasonic', 'panasonic'], ['nec', 'nec'], ['apple tv', 'appletv'], ['apple', 'apple'], ['chromecast', 'chromecast'], ['google', 'chromecast'], ['bose', 'bose']];
+const WORDMARK = { marantz: 'Marantz', onkyo: 'Onkyo', pioneer: 'Pioneer', integra: 'Integra', jvc: 'JVC', benq: 'BenQ', optoma: 'Optoma', 'sony': 'Sony' };
+function logo(d, big) {
+  const m = `${d.make || ''} ${d.model || ''}`.toLowerCase();
+  const k = (BRAND_KEYS.find(([n]) => m.includes(n)) || [])[1]; const B = k && window.BRANDS && window.BRANDS[k];
+  const bc = B ? (B.hex === '#FFFFFF' || B.hex === '#000000' ? 'var(--accent-c)' : B.hex) : 'var(--line)';
+  if (B) return `<span class="logo${big ? ' big' : ''}${['sky', 'lg', 'nec', 'epson', 'panasonic', 'samsung', 'sony', 'denon', 'roku', 'sonos', 'bose', 'yamaha'].includes(k) ? ' wide' : ''}" style="--bc:${bc}" title="${esc(B.title)}"><svg viewBox="0 0 24 24" role="img" aria-label="${esc(B.title)}"><path d="${B.d}"/></svg></span>`;
+  const w = Object.keys(WORDMARK).find((n) => m.includes(n));
+  const txt = w ? WORDMARK[w] : (d.make || d.kind || '?').replace(/\s*\(.*\)/, '').split(/[ /]/)[0];
+  return `<span class="logo${big ? ' big' : ''}" style="--bc:var(--line)"><span class="wm">${esc(txt)}</span></span>`;
+}
+let kindFilter = '';
+// Kind → Sonor service (code + colour), same scheme as Engineering's service tabs.
+const KIND_SVC = { 'TV': ['03', 'var(--s-video)'], 'Projector': ['01', 'var(--s-cinema)'], 'AV receiver': ['02', 'var(--s-audio)'], 'Speaker': ['02', 'var(--s-audio)'], 'Satellite': ['03', 'var(--s-video)'], 'Streamer': ['03', 'var(--s-video)'] };
+const kc = (k) => (KIND_SVC[k] || ['00', 'var(--edge)'])[1];
+function setView(v) { $('#views').dataset.view = v; if (v === 'list') { sel = null; lastRemote = ''; } window.scrollTo(0, 0); }
+function renderList() {
+  const list = $('#list'); const all = state.devices || [];
+  if (!all.length) { $('#kinds').innerHTML = ''; list.innerHTML = '<div class="empty" style="grid-column:1/-1">Nothing yet. Press <b>Find devices</b>.</div>'; return; }
+  const kinds = [...new Set(all.map((d) => d.kind))].sort((a, b) => (KIND_ORDER.indexOf(a) + 99) % 99 - (KIND_ORDER.indexOf(b) + 99) % 99);
+  if (kindFilter && !kinds.includes(kindFilter)) kindFilter = '';
+  $('#kinds').innerHTML = [['', 'All', all.length], ...kinds.map((k) => [k, k === 'AV receiver' ? 'Receivers' : k + 's', all.filter((d) => d.kind === k).length])].map(([k, l, n]) => `<button data-kind="${esc(k)}" class="${kindFilter === k ? 'on' : ''}" style="--kc:${k ? kc(k) : 'var(--accent-c)'}">${k ? `<span class="code">${(KIND_SVC[k] || ['00'])[0]}</span>` : ''}${esc(l)}<i>${n}</i></button>`).join('');
+  const on = all.filter((d) => pow(d) === 'on').length; const needPair = all.filter((d) => d.caps && d.caps.pairable && !d.caps.paired).length;
+  $('#stats').innerHTML = `<div style="--kc:var(--accent-c)"><b>${all.length}</b><span>Controllable</span></div><div style="--kc:var(--ok)"><b>${on}</b><span>Switched on</span></div><div style="--kc:var(--warn)"><b>${needPair}</b><span>Need pairing</span></div><div style="--kc:var(--edge)"><b>${new Set(all.map((d) => d.make)).size}</b><span>Makers</span></div>`;
+  $('#kinds').querySelectorAll('button').forEach((b) => b.onclick = () => { kindFilter = b.dataset.kind; renderList(); });
+  const devs = all.filter((d) => !kindFilter || d.kind === kindFilter).sort((a, b) => (KIND_ORDER.indexOf(a.kind) + 99) % 99 - (KIND_ORDER.indexOf(b.kind) + 99) % 99 || title(a).localeCompare(title(b)));
+  list.innerHTML = devs.map((d) => `
+    <div class="card" data-ip="${esc(d.ip)}" role="button" tabindex="0" style="--kc:${kc(d.kind)}">
+      ${logo(d)}
+      <div class="meta"><div class="name">${esc(title(d))}</div><div class="sub">${esc(d.kind)}${d.model && d.name ? ' · ' + esc(d.model) : ''}</div><div class="sub ip">${esc(d.ip)}</div></div>
+      <span class="dot ${esc(pow(d))}" title="${esc(pow(d))}"></span>
+      ${d.caps && d.caps.pairable && !d.caps.paired ? '<span class="tag pair">pair</span>' : d.caps && !d.caps.keys.length ? '<span class="tag">no IP control</span>' : ''}
     </div>`).join('');
-  list.querySelectorAll('.box').forEach((el) => el.onclick = () => { sel = el.dataset.ip; localStorage.setItem('skySel', sel); render(); });
-
-  const s = state.scan;
-  $('#scanBtn').disabled = !!s.running;
-  $('#prog').hidden = !s.running;
-  if (s.running) { $('#prog div').style.width = (100 * s.done / (s.total || 1)) + '%'; $('#scanState').textContent = 'Scanning… (SSDP and port sweep)'; }
-  else if (s.error) $('#scanState').textContent = 'Scan failed: ' + s.error;
-  else if (s.lastResult) $('#scanState').textContent = `Last scan found ${s.lastResult.found} box(es) on ${s.lastResult.subnets.map((x) => x + '.x').join(', ')}.`;
-  else $('#scanState').textContent = '';
-
-  const b = state.boxes.find((x) => x.ip === sel);
-  $('#remote').hidden = !b; $('#noSel').hidden = !!b;
-  document.querySelector('main').classList.toggle('has-sel', !!b);
-  if (b) {
-    $('#rName').textContent = b.name || b.model;
-    $('#rSub').textContent = [b.ip, b.model, b.hardware, 'power: ' + b.power, b.port ? 'port ' + b.port : ''].filter(Boolean).join(' · ') + ((b.notes && b.notes.length) ? ' — ' + b.notes.join(' ') : '');
-  }
+  list.querySelectorAll('.card').forEach((el) => { const open = () => { sel = el.dataset.ip; remember(sel); setView('remote'); try { history.pushState({ remote: 1 }, ''); } catch {} render(); if (!DEMO) api('/api/status', { ip: sel }).then(() => refresh()).catch(() => {}); }; el.onclick = open; el.onkeydown = (e) => { if (e.key === 'Enter') open(); }; });
 }
 
-async function refresh() { try { state = await api('/api/boxes'); if (!RELAY) bridgeState(true, DEMO ? 'Demo data' : window.SkyNative ? 'Direct' : 'Bridge'); render(); } catch (e) { bridgeState(false, 'Bridge offline'); toast('Cannot reach the Sky bridge: ' + e.message, true); } }
-async function poll() { await refresh(); if (state.scan.running) setTimeout(poll, 700); }
-
+// ── Remote: only the buttons this device's driver supports ──
+const B = (k, label, cls = '') => `<button data-k="${k}" class="${cls}">${label}</button>`;
+function remoteHtml(d) {
+  const c = d.caps || { keys: [], inputs: [] }; const has = (k) => c.keys.includes(k); const any = (...ks) => ks.some(has);
+  const st = d.state || {}; const parts = [];
+  parts.push(`<div class="rtitle">${logo(d, true)}<div><div class="name">${esc(title(d))}</div><div class="muted">${esc(sub(d))}${d.firmware ? ' · fw ' + esc(d.firmware) : ''}</div></div></div>`);
+  const sbits = [st.power && `Power <b>${esc(st.power)}</b>`, st.volume != null && `Volume <b>${esc(st.volume)}</b>`, st.mute && '<b>Muted</b>', st.input && `Input <b>${esc(((c.inputs || []).find((i) => i[0] === st.input) || [])[1] || st.input)}</b>`, st.mode && `Mode <b>${esc(st.mode)}</b>`, st.lamp && `Lamp <b>${esc(st.lamp)}</b>`, st.error && `<span style="color:var(--bad)">${esc(st.error)}</span>`].filter(Boolean);
+  if (sbits.length) parts.push(`<div class="stat">${sbits.map((x) => `<span>${x}</span>`).join('')}</div>`);
+  if (c.pairable && !c.paired) parts.push(`<div class="pairbox"><b>Pair with this ${esc(d.kind === 'TV' ? 'TV' : d.kind.toLowerCase())} first</b>${c.pairField ? `<input id="pairIn" placeholder="${esc(c.pairField)}">` : `<span>Press Pair, then accept the prompt on the ${esc(d.kind === 'TV' ? 'TV' : d.kind.toLowerCase())} within a minute.</span>`}<button id="pairGo" class="primary">Pair</button></div>`);
+  if (!c.keys.length) parts.push(`<div class="note">${esc(c.note || 'Found, but this model has no IP control we can use yet.')}</div>`);
+  const row1 = [has('power') && B('power', '⏻ Power', 'power'), has('poweron') && B('poweron', 'On'), has('poweroff') && B('poweroff', 'Off'), has('source') && B('source', 'Source'), has('sky') && B('sky', 'sky', 'sky'), has('home') && !has('up') && B('home', 'Home')].filter(Boolean);
+  if (row1.length) parts.push(`<div class="g g${Math.min(row1.length, 4)}">${row1.join('')}</div>`);
+  if (c.inputs && c.inputs.length) parts.push(`<div class="sect">Inputs</div><div class="chips">${c.inputs.map(([id, l]) => `<button data-k="input:${esc(id)}" class="${st.input === id ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`);
+  if (has('up')) {
+    parts.push(`<div class="dpad"><span></span>${B('up', '▲')}<span></span>${B('left', '◀')}${B('select', 'OK', 'ok')}${B('right', '▶')}<span></span>${B('down', '▼')}<span></span></div>`);
+    const nav = [['back', 'Back'], ['home', 'Home'], ['menu', 'Menu'], ['info', 'Info'], ['guide', 'Guide'], ['exit', 'Exit'], ['search', 'Search'], ['text', 'Text'], ['replay', 'Replay']].filter(([k]) => has(k)).map(([k, l]) => B(k, l));
+    if (nav.length) parts.push(`<div class="g g3">${nav.join('')}</div>`);
+  }
+  const vol = [has('voldown') && B('voldown', 'VOL −'), has('mute') && B('mute', st.mute ? 'Unmute' : 'Mute'), has('volup') && B('volup', 'VOL +')].filter(Boolean);
+  const ch = [has('chdown') && B('chdown', 'CH ▼'), has('chup') && B('chup', 'CH ▲')].filter(Boolean);
+  if (vol.length) parts.push(`<div class="g g${vol.length}">${vol.join('')}</div>`);
+  if (ch.length) parts.push(`<div class="g g${ch.length}" style="grid-template-columns:repeat(${ch.length},1fr)">${ch.join('')}</div>`);
+  if (c.volume) parts.push(`<input type="range" id="volSlide" min="${c.volume.min}" max="${c.volume.max}" value="${st.volume ?? Math.round((c.volume.min + c.volume.max) / 4)}">`);
+  const tr = [['rew', '⏪'], ['prev', '⏮'], ['play', '▶'], ['pause', '⏸'], ['stop', '⏹'], ['next', '⏭'], ['ff', '⏩'], ['rec', '⏺']].filter(([k]) => has(k)).map(([k, l]) => B(k, l));
+  if (tr.length) parts.push(`<div class="g" style="grid-template-columns:repeat(${tr.length <= 5 ? tr.length : Math.ceil(tr.length / 2)},1fr)">${tr.join('')}</div>`);
+  if (CL.every(has)) parts.push(`<div class="g g4">${B('red', '&nbsp;', 'c-red')}${B('green', '&nbsp;', 'c-green')}${B('yellow', '&nbsp;', 'c-yellow')}${B('blue', '&nbsp;', 'c-blue')}</div>`);
+  if (DG.every(has)) parts.push(`<div class="g g3">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => B(String(n), n)).join('')}<span></span>${B('0', '0')}<span></span></div><div class="row"><input id="chan" placeholder="Channel number" inputmode="numeric"><button id="chanGo" class="primary">Go</button></div>`);
+  if (c.modes && c.modes.length) parts.push(`<div class="sect">Sound mode</div><div class="chips">${c.modes.map(([id, l]) => `<button data-k="mode:${esc(id)}" class="${st.mode === id ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`);
+  const extra = [['zone2on', 'Zone 2 on'], ['zone2off', 'Zone 2 off'], ['boxoffice', 'Box Office']].filter(([k]) => has(k)).map(([k, l]) => B(k, l));
+  if (extra.length) parts.push(`<div class="g g3">${extra.join('')}</div>`);
+  if (c.apps && c.apps.length) parts.push(`<div class="sect">Apps</div><div class="chips">${c.apps.map(([id, l]) => `<button data-k="app:${esc(id)}">${esc(l)}</button>`).join('')}</div>`);
+  if (c.note && c.keys.length) parts.push(`<div class="note">${esc(c.note)}</div>`);
+  parts.push(`<div class="row" style="justify-content:space-between;flex-wrap:wrap"><button id="refresh">Refresh status</button><button id="rename">Rename</button>${c.wake !== undefined || has('poweron') ? '<button id="setmac">MAC</button>' : ''}<button id="remove">Remove</button></div>`);
+  return parts.join('');
+}
+let lastRemote = '';
+function render() {
+  renderList();
+  const s = state.scan || {};
+  $('#scanBtn').disabled = !!s.running; $('#prog').hidden = !s.running;
+  if (s.running) { $('#prog div').style.width = (100 * (s.done || 0) / (s.total || 1)) + '%'; $('#scanState').textContent = s.phase === 'identify' ? 'Asking each device what it is…' : 'Knocking on control ports…'; }
+  else if (s.error) $('#scanState').textContent = 'Scan failed: ' + s.error;
+  else if (s.lastResult) $('#scanState').textContent = `Last scan: ${s.lastResult.found} controllable on ${s.lastResult.subnets.map((x) => x + '.x').join(', ')}${s.lastResult.answered != null ? ` (${s.lastResult.answered} addresses answered)` : ''}.`;
+  else $('#scanState').textContent = '';
+  if (!$('#addDrv').dataset.ok && (state.drivers || []).length) { $('#addDrv').innerHTML = '<option value="">Work it out</option>' + state.drivers.map((d) => `<option value="${esc(d.id)}">${esc(d.make)}</option>`).join(''); $('#addDrv').dataset.ok = 1; }
+  const d = (state.devices || []).find((x) => x.ip === sel);
+  $('#remote').hidden = !d; $('#noSel').hidden = !!d;
+  if (!d) { if ($('#views').dataset.view === 'remote') setView('list'); return; }
+  $('#rCount').textContent = `${(state.devices || []).length} on this network`; $('#remotePanel').style.setProperty('--kc', kc(d.kind));
+  const html = remoteHtml(d); if (html === lastRemote) return; lastRemote = html;
+  $('#remote').innerHTML = html; wireRemote(d);
+}
+function wireRemote(d) {
+  $('#remote').querySelectorAll('[data-k]').forEach((b) => b.onclick = () => { send([b.dataset.k]); if (navigator.vibrate) navigator.vibrate(10); });
+  const vs = $('#volSlide'); if (vs) vs.onchange = () => send(['vol:' + vs.value]);
+  const cg = $('#chanGo'); if (cg) { cg.onclick = () => { const v = $('#chan').value.replace(/\D/g, ''); if (v) send(v.split('')); $('#chan').value = ''; }; $('#chan').onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Enter') cg.click(); }; }
+  const pg = $('#pairGo'); if (pg) pg.onclick = async () => { pg.disabled = true; pg.textContent = 'Waiting for the device…'; const v = $('#pairIn') ? $('#pairIn').value.trim() : ''; try { await api('/api/pair', { ip: d.ip, psk: v, password: v }); toast('Paired'); lastRemote = ''; refresh(); } catch (e) { toast(e.message, true); pg.disabled = false; pg.textContent = 'Pair'; } };
+  $('#refresh').onclick = async () => { try { await api('/api/status', { ip: d.ip }); lastRemote = ''; refresh(); } catch (e) { toast(e.message, true); } };
+  $('#rename').onclick = async () => { const n = prompt('Name for this device (e.g. Lounge TV)', d.name || ''); if (n === null) return; await api('/api/rename', { ip: d.ip, name: n }); lastRemote = ''; refresh(); };
+  const sm = $('#setmac'); if (sm) sm.onclick = async () => { const m = prompt('MAC address, used to wake it (e.g. 64:1C:AE:00:11:22)', d.mac || ''); if (m === null) return; await api('/api/setmac', { ip: d.ip, mac: m }); lastRemote = ''; refresh(); };
+  $('#remove').onclick = async () => { if (!confirm('Remove this device from the list?')) return; await api('/api/remove', { ip: d.ip }); sel = null; refresh(); };
+  $('#remote').querySelectorAll('input').forEach((i) => i.addEventListener('keydown', (e) => e.stopPropagation()));
+}
+async function refresh() { try { state = await api('/api/devices'); if (!RELAY) bridgeState(true, DEMO ? 'Demo data' : window.SonorAgent ? 'On this tablet' : 'Bridge'); lastRemote = DEMO ? '' : lastRemote; render(); } catch (e) { bridgeState(false, 'Bridge offline'); toast('Cannot reach the bridge: ' + e.message, true); } }
+async function poll() { await refresh(); if ((state.scan || {}).running) setTimeout(poll, 700); }
 async function send(keys) {
   if (!sel) return;
-  try { await api('/api/key', { ip: sel, keys }); }
-  catch (e) { toast(e.message, true); }
+  try { await api('/api/key', { ip: sel, keys }); if (DEMO) { lastRemote = ''; render(); } }
+  catch (e) { toast(e.message, true); if (e.needsPair) { lastRemote = ''; refresh(); } }
 }
 
-$('#digits').innerHTML = [1,2,3,4,5,6,7,8,9,'',0,''].map((d) => d === '' ? '<span></span>' : `<button data-k="${d}">${d}</button>`).join('');
-document.querySelectorAll('[data-k]').forEach((btn) => btn.addEventListener('click', () => { send([btn.dataset.k]); if (navigator.vibrate) navigator.vibrate(10); }));
-
+$('#backBtn').onclick = () => { if (history.state && history.state.remote) history.back(); else { setView('list'); render(); } };
+window.addEventListener('popstate', () => { if ($('#views').dataset.view === 'remote') { setView('list'); render(); } });
 $('#bridgePick').onchange = (e) => { bridgeId = e.target.value; try { localStorage.setItem('skyBridge', bridgeId); } catch {} refresh(); };
 $('#scanBtn').onclick = async () => { try { await api('/api/scan', {}); poll(); } catch (e) { toast(e.message, true); } };
 $('#scanSub').onclick = async () => { const subnets = $('#subnets').value.split(/[ ,]+/).filter(Boolean); if (!subnets.length) return toast('Enter a subnet', true); try { await api('/api/scan', { subnets }); poll(); } catch (e) { toast(e.message, true); } };
-$('#addBtn').onclick = async () => { try { const r = await api('/api/add', { ip: $('#addIp').value.trim() }); sel = r.box.ip; localStorage.setItem('skySel', sel); toast('Added ' + r.box.model); refresh(); } catch (e) { toast(e.message, true); } };
-$('#chanGo').onclick = () => { const v = $('#chan').value.replace(/\D/g, ''); if (v) send(v.split('')); $('#chan').value = ''; };
-$('#chan').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#chanGo').click(); e.stopPropagation(); });
-$('#refresh').onclick = async () => { try { await api('/api/status', { ip: sel }); refresh(); } catch (e) { toast(e.message, true); } };
-$('#rename').onclick = async () => { const b = state.boxes.find((x) => x.ip === sel); const n = prompt('Name for this box (e.g. Lounge Sky Q)', b?.name || ''); if (n === null) return; await api('/api/rename', { ip: sel, name: n }); refresh(); };
-$('#remove').onclick = async () => { if (!confirm('Remove this box from the list?')) return; await api('/api/remove', { ip: sel }); sel = null; refresh(); };
+$('#addBtn').onclick = async () => { try { const r = await api('/api/add', { ip: $('#addIp').value.trim(), driver: $('#addDrv').value || undefined }); sel = r.device.ip; remember(sel); toast('Added ' + title(r.device)); refresh(); } catch (e) { toast(e.message, true); } };
+$('#addIp').addEventListener('keydown', (e) => e.stopPropagation()); $('#subnets').addEventListener('keydown', (e) => e.stopPropagation());
 
-const keymap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'select', Backspace: 'backup', Escape: 'dismiss', p: 'power', h: 'home', g: 'tvguide', i: 'i', r: 'red', s: 'sky', PageUp: 'channelup', PageDown: 'channeldown' };
+const keymap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'select', Backspace: 'back', Escape: 'back', p: 'power', h: 'home', g: 'guide', i: 'info', m: 'mute', '+': 'volup', '=': 'volup', '-': 'voldown', PageUp: 'chup', PageDown: 'chdown' };
+let paused = false;
 document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.metaKey || e.ctrlKey) return;
+  const d = (state.devices || []).find((x) => x.ip === sel); if (!d) return;
+  if (e.key === 'Escape') { e.preventDefault(); setView('list'); render(); return; }
   let k = keymap[e.key] || (/^[0-9]$/.test(e.key) ? e.key : null);
   if (e.key === ' ') { k = paused ? 'play' : 'pause'; paused = !paused; }
-  if (k) { e.preventDefault(); send([k]); }
+  if (k && d.caps && d.caps.keys.includes(k)) { e.preventDefault(); send([k]); }
 });
 
 if (DEMO) $('#demoBanner').hidden = false;
 refresh();
-setInterval(() => { if (!document.hidden && !state.scan.running) refresh(); }, 15000);
+setInterval(() => { if (!document.hidden && !(state.scan || {}).running && !DEMO) refresh(); }, 15000);
 </script>
 </body>
 </html>

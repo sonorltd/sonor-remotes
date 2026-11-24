@@ -1,5 +1,5 @@
 'use strict';
-// NATIVE transport: used when the page runs inside the Sonor Sky Remote phone app (Capacitor).
+// NATIVE transport: used when the page runs inside the Sonor Remotes app (Capacitor).
 // The app's SkyTcp plugin opens TCP sockets directly, so the phone talks to the Sky boxes itself:
 // no Pi, no bridge. Same actions as server.js, same box records, stored on the phone.
 (function () {

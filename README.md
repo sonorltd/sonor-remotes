@@ -1,12 +1,18 @@
-# Sky Remote (Sonor) · v1.3.0
+# Remotes (Sonor) · v2.1.0
 
-Finds Sky boxes on the local network and controls them over IP, for racks where the Sky remote can't reach.
-Internal test tool (projects use the Chowmain Control4 driver).
+Finds controllable AV kit on the site network (Sky, Denon / Marantz, Yamaha, Onkyo / Pioneer, LG, Samsung, Sony, Roku, Sonos,
+PJLink and JVC projectors) and gives each one a remote with only the buttons it supports. Opens on **Discovered**: every device
+as a card with its maker's mark (Simple Icons, CC0; wordmark tile where there is none), grouped by Sonor service colour
+(03 Video, 02 Audio, 01 Cinema). Tap a card for its remote; Back returns to the list.
+
+> **Renamed 2026-11-24** from *Sky Remote* (repo `sonor-sky-remote` → `sonor-remotes`, folder `APP - Sky Remote` → `APP - Remotes`,
+> Pi service `sonor-sky-remote` → `sonor-remotes`, which `pi/install.sh` migrates). Supabase objects keep their `sky_` names
+> (internal; renaming them is a schema change). Android id stays `uk.co.sonor.skyremote` so tablets upgrade in place.
 
 Two ways to use the same page:
 
 - **On site (local):** a bridge (Pi, Mac or PC) on the site network serves the page at `http://<bridge-ip>:8049`. Any phone, tablet or laptop on the site Wi-Fi opens it.
-- **Hosted:** `https://apps.sonor.co.uk/sonor-sky-remote/` (Cloudflare login like every Sonor app). Pick a bridge from the list; commands go through Supabase (`sky_commands`) to the bridge, which makes only outbound HTTPS calls, so nothing needs opening on the site router. About half a second per key press.
+- **Hosted:** `https://apps.sonor.co.uk/sonor-remotes/` (Cloudflare login like every Sonor app). Pick a bridge from the list; commands go through Supabase (`sky_commands`) to the bridge, which makes only outbound HTTPS calls, so nothing needs opening on the site router. About half a second per key press.
 
 A browser can't open the TCP connection a Sky box needs, so a bridge on site always does the actual talking.
 
@@ -15,7 +21,7 @@ A browser can't open the TCP connection a Sky box needs, so a bridge on site alw
 1. Raspberry Pi OS (Bookworm), on the site network (Ethernet best).
 2. Copy this folder to the Pi, then: `sudo bash pi/install.sh "Test rig Pi"`
 3. It starts on every boot, serves the local page on port 8049 and links itself to the hosted page under that name.
-Logs: `journalctl -u sonor-sky-remote -f`. The bridge's key is in `/opt/sonor-sky-remote/relay.json` (delete it to register as a new bridge).
+Logs: `journalctl -u sonor-remotes -f`. The bridge's key is in `/opt/sonor-remotes/relay.json` (delete it to register as a new bridge).
 
 ## Supabase
 
@@ -24,9 +30,9 @@ Logs: `journalctl -u sonor-sky-remote -f`. The bridge's key is in `/opt/sonor-sk
 ## Run it on a Mac or PC
 
 1. Install Node.js 18 or later (https://nodejs.org) if the machine doesn't have it.
-2. Mac: double-click **Start Sky Remote.command**. Windows: double-click **start.bat**. Or in a terminal: `node server.js`.
+2. Mac: double-click **Start Remotes.command**. Windows: double-click **start.bat**. Or in a terminal: `node server.js`.
 3. The page opens at http://localhost:8049. The terminal also prints a LAN address (e.g. `http://192.168.1.20:8049`) to open on a phone.
-4. Press **Find boxes**. Pick a box, rename it (e.g. "Lounge Sky Q"), and use the remote.
+4. Press **Find devices**. Tap a card, rename it (e.g. "Lounge Sky Q"), and use the remote.
 
 Found boxes are saved in `boxes.json` next to the app.
 

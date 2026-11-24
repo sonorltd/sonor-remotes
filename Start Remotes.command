@@ -1,5 +1,5 @@
 #!/bin/bash
-# Double-click on a Mac to start the Sky Remote, then it opens in your browser.
+# Double-click on a Mac to start Sonor Remotes, then it opens in your browser.
 cd "$(dirname "$0")"
 if ! command -v node >/dev/null 2>&1; then
   echo "Node.js is needed. Install it from https://nodejs.org (LTS), then double-click this again."

@@ -1,8 +1,8 @@
 {
-  "name": "sonor-sky-remote-mobile",
+  "name": "sonor-remotes-mobile",
   "version": "1.2.0",
   "private": true,
-  "description": "Sky Remote phone app: the same page, talking to Sky boxes directly over TCP.",
+  "description": "Remotes phone app: the same page, talking to AV kit directly over TCP.",
   "scripts": {
     "www": "rm -rf www && mkdir -p www && cp -R ../public/. www/",
     "sync": "npm run www && npx cap sync",

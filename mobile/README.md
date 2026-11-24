@@ -1,4 +1,6 @@
-# Sky Remote phone app (Android)
+# Remotes phone app (Android)
+
+> Renamed from Sky Remote in v2.1.0. The Android id stays `uk.co.sonor.skyremote` so installed copies upgrade in place.
 
 The same remote page as the web app, wrapped as an Android app. The app opens the TCP connection to the Sky box itself (plugin `SkyTcp`, `android/app/src/main/java/uk/co/sonor/skyremote/SkyTcpPlugin.java`), so on site there's **no Pi or laptop needed**: join the site Wi-Fi, open the app, press Find boxes.
 

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Sky Remote</string>
-    <string name="title_activity_main">Sky Remote</string>
+    <string name="app_name">Remotes</string>
+    <string name="title_activity_main">Remotes</string>
     <string name="package_name">uk.co.sonor.skyremote</string>
     <string name="custom_url_scheme">uk.co.sonor.skyremote</string>
 </resources>
