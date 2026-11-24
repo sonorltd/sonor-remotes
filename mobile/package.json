@@ -1,0 +1,14 @@
+{
+  "name": "sonor-sky-remote-mobile",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Sky Remote phone app: the same page, talking to Sky boxes directly over TCP.",
+  "scripts": {
+    "www": "rm -rf www && mkdir -p www && cp -R ../public/. www/",
+    "sync": "npm run www && npx cap sync",
+    "android": "npm run sync && npx cap open android",
+    "apk": "npm run sync && cd android && ./gradlew assembleDebug && echo APK: android/app/build/outputs/apk/debug/app-debug.apk"
+  },
+  "dependencies": { "@capacitor/android": "^6.2.0", "@capacitor/core": "^6.2.0" },
+  "devDependencies": { "@capacitor/cli": "^6.2.0" }
+}

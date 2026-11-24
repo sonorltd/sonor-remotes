@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en" data-theme="graphite">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1C1C1E">
+<title>Sky Remote · Sonor</title>
+<link rel="icon" type="image/svg+xml" href="./data/favicon.svg">
+<script src="data/sonor-theme.js"></script>  <!-- sonor-platform §2: theme FIRST (graphite default) -->
+<link rel="stylesheet" href="./data/brand.css">
+<script type="module" src="https://apps.sonor.co.uk/sonor-kit/v1/kit.js"></script>  <!-- sonor-platform §1: served kit (page still works offline on site) -->
+<link rel="stylesheet" href="./data/sonor-header.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
+<script src="./data/sonor-brand.js"></script>
+<script src="./data/sonor-header.js"></script>
+<script src="./native.js"></script>  <!-- phone app only: direct TCP to the boxes -->
+<style>
+:root, [data-theme] {
+  /* Map to brand tokens (brand.css). Fallbacks keep it usable if brand.css fails to load. */
+  --bg: var(--bg-0, #1C1C1E); --panel: var(--bg-1, #242426); --panel2: var(--bg-2, #2C2C2E); --line: var(--border-strong, rgba(255,255,255,.18));
+  --text: var(--text-primary, #F5F5F7); --muted: var(--text-muted, #98989D); --accent-c: var(--accent, #3A8AA8);
+  --ok: var(--status-ok, #2fbf71); --warn: var(--status-amber, #e3a72f); --bad: var(--status-bad, #e5484d);
+  --red: #d93b3b; --green: #2e9e4f; --yellow: #d8b020; --blue: #2f6fd6; /* Sky key colours never change with theme */
+  color-scheme: dark;
+}
+[data-theme='slate'] { color-scheme: light; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 var(--font-ui, "DM Sans", system-ui, sans-serif); }
+.toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.toolbar .hint { flex: 1; color: var(--muted); font-size: 13px; min-width: 0; }
+select { font: inherit; color: var(--text); background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; max-width: 45vw; }
+button { font: inherit; font-family: inherit; color: var(--text); background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; cursor: pointer; touch-action: manipulation; user-select: none; }
+button:active { transform: scale(.96); background: var(--line); }
+button.primary { background: var(--cta-bg, var(--accent-c)); border-color: var(--cta-bg, var(--accent-c)); color: var(--cta-text, #fff); }
+button.primary:hover { background: var(--cta-hover, var(--accent-c)); }
+input { font: inherit; color: var(--text); background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+main { display: grid; grid-template-columns: minmax(260px, 360px) 1fr; gap: 16px; padding: 16px; max-width: 1100px; margin: 0 auto; }
+@media (max-width: 760px) { main { grid-template-columns: 1fr; } main.has-sel > section:last-child { order: -1; } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+.panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row input { flex: 1; }
+.box { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; }
+.box:hover { background: var(--panel2); }
+.box.sel { border-color: var(--accent-c); background: var(--panel2); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); flex: none; }
+.dot.on { background: var(--ok); } .dot.standby { background: var(--warn); } .dot.offline { background: var(--bad); }
+.box .meta { flex: 1; min-width: 0; }
+.box .name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.box .sub { color: var(--muted); font-size: 12.5px; }
+.tag { font-size: 11px; padding: 2px 6px; border-radius: 6px; background: var(--line); color: var(--muted); }
+.muted { color: var(--muted); font-size: 13px; }
+.progress { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin: 8px 0; }
+.progress div { height: 100%; background: var(--accent-c); width: 0; transition: width .3s; }
+.remote { max-width: 340px; margin: 0 auto; display: grid; gap: 12px; }
+.remote .title { text-align: center; }
+.remote .title .name { font-weight: 700; font-size: 17px; }
+.g { display: grid; gap: 8px; }
+.g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+.remote button { padding: 12px 6px; font-size: 14px; border-radius: 12px; }
+.dpad { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 58px); gap: 6px; }
+.dpad button { font-size: 20px; }
+.dpad .ok { border-radius: 50%; background: var(--panel); font-size: 14px; font-weight: 700; }
+.c-red { background: var(--red) !important; border: 0 !important; } .c-green { background: var(--green) !important; border: 0 !important; }
+.c-yellow { background: var(--yellow) !important; border: 0 !important; color: #222 !important; } .c-blue { background: var(--blue) !important; border: 0 !important; }
+.power { background: #3a1d20 !important; border-color: #5c2a2f !important; color: #ff8c8f !important; }
+.sky { font-weight: 800; letter-spacing: .02em; background: linear-gradient(135deg, #e2343b, #ffb21a 45%, #3a7bfd) !important; border: 0 !important; color: #fff !important; }
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90vw; }
+.toast.show { opacity: 1; } .toast.err { border-color: var(--bad); }
+.empty { text-align: center; padding: 30px 10px; color: var(--muted); }
+details { margin-top: 10px; } summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+kbd { font-size: 11px; background: var(--line); padding: 1px 5px; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="sonor-header"></div>
+<div class="toolbar">
+  <select id="bridgePick" hidden title="Which site's bridge (Pi) to use"></select>
+  <span class="hint" id="bridgeHint">Finds Sky Q, Sky Q Mini and Sky+HD boxes on this network.</span>
+  <button id="scanBtn" class="primary">Find boxes</button>
+</div>
+<div id="demoBanner" hidden style="margin:12px 16px 0;padding:10px 14px;border:1px solid #8058a1;background:rgba(128,88,161,.15);border-radius:10px;font-size:13px"><b>Demo:</b> four sample Sky boxes. Keys are shown, not sent. On site, use the Android app or the Pi bridge.</div>
+<main>
+  <section>
+    <div class="panel">
+      <h2>Boxes on the network</h2>
+      <div id="scanState" class="muted"></div>
+      <div class="progress" id="prog" hidden><div></div></div>
+      <div id="list"></div>
+      <details>
+        <summary>Add by IP or scan another subnet</summary>
+        <div class="row" style="margin-top:10px"><input id="addIp" placeholder="192.168.1.50" inputmode="decimal"><button id="addBtn">Add</button></div>
+        <div class="row" style="margin-top:8px"><input id="subnets" placeholder="Extra subnets, e.g. 192.168.20.0, 10.0.5.0"><button id="scanSub">Scan</button></div>
+        <p class="muted">The scan checks the subnets the bridge (this computer or the site Pi) is on. Sky boxes on a separate VLAN need that subnet entered here, and the network must route to it.</p>
+      </details>
+    </div>
+  </section>
+  <section>
+    <div class="panel" id="remotePanel">
+      <div class="empty" id="noSel">Pick a box on the left, or press <b>Find boxes</b>.</div>
+      <div class="remote" id="remote" hidden>
+        <div class="title">
+          <div class="name" id="rName"></div>
+          <div class="muted" id="rSub"></div>
+        </div>
+        <div class="g g3">
+          <button data-k="power" class="power">⏻ Power</button>
+          <button data-k="sky" class="sky">sky</button>
+          <button data-k="home">Home</button>
+        </div>
+        <div class="g g3">
+          <button data-k="search">Search</button>
+          <button data-k="sidebar">Sidebar</button>
+          <button data-k="i">i</button>
+        </div>
+        <div class="dpad">
+          <span></span><button data-k="up">▲</button><span></span>
+          <button data-k="left">◀</button><button data-k="select" class="ok">OK</button><button data-k="right">▶</button>
+          <span></span><button data-k="down">▼</button><span></span>
+        </div>
+        <div class="g g3">
+          <button data-k="backup">Back</button>
+          <button data-k="channelup">CH ▲</button>
+          <button data-k="help">Help</button>
+          <button data-k="text">Text</button>
+          <button data-k="channeldown">CH ▼</button>
+          <button data-k="dismiss">Dismiss</button>
+        </div>
+        <div class="g g4">
+          <button data-k="rewind">⏪</button><button data-k="play">▶</button><button data-k="pause">⏸</button><button data-k="fastforward">⏩</button>
+          <button data-k="stop">⏹</button><button data-k="record" style="color:#ff6b6b">⏺</button><button data-k="tvguide">Guide</button><button data-k="boxoffice">Box Off.</button>
+        </div>
+        <div class="g g4">
+          <button data-k="red" class="c-red">&nbsp;</button><button data-k="green" class="c-green">&nbsp;</button>
+          <button data-k="yellow" class="c-yellow">&nbsp;</button><button data-k="blue" class="c-blue">&nbsp;</button>
+        </div>
+        <div class="g g3" id="digits"></div>
+        <div class="row"><input id="chan" placeholder="Channel number, e.g. 401" inputmode="numeric"><button id="chanGo" class="primary">Go</button></div>
+        <div class="row" style="justify-content:space-between">
+          <button id="refresh">Refresh status</button><button id="rename">Rename</button><button id="remove">Remove</button>
+        </div>
+        <p class="muted" style="text-align:center">Keyboard: arrows, <kbd>Enter</kbd> OK, <kbd>Backspace</kbd> back, <kbd>0-9</kbd>, <kbd>P</kbd> power, <kbd>H</kbd> home, <kbd>Space</kbd> play/pause</p>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const APP_VERSION = '1.3.0';
+if (window.SonorHeader) {
+  SonorHeader.init({ appName: 'Sky Remote', repo: 'sonor-sky-remote' });
+  const v = document.getElementById('nav-version'); if (v) v.textContent = 'v' + APP_VERSION;
+}
+function bridgeState(ok, text) { if (window.SonorHeader) SonorHeader.updateDbStatus(ok ? 'live' : 'error', text); }
+const $ = (s) => document.querySelector(s);
+let state = { boxes: [], scan: {} };
+let sel = (() => { try { return localStorage.getItem('skySel'); } catch { return null; } })();
+let paused = false;
+
+// ── Transport ───────────────────────────────────────────
+// LOCAL: the page is served by the bridge itself (Pi / laptop on site) → /api/* on the same origin.
+// RELAY: the page is hosted on apps.sonor.co.uk → commands go into Supabase (sky_commands) and the
+//        site's bridge picks them up (lib/relay.js). Browsers can't open TCP to a Sky box, so a
+//        bridge on site is always what actually talks to the boxes.
+const SB_URL = 'https://ysmvklstkzodlocttspy.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzbXZrbHN0a3pvZGxvY3R0c3B5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njc0OTMsImV4cCI6MjA4OTM0MzQ5M30.08kRS_dtbwz0rSYezNGMJHnOU_st8GKZseQPefcMEMc';
+const qs = new URLSearchParams(location.search);
+const isLocalHost = ['localhost', '127.0.0.1'].includes(location.hostname);
+const REST = ((isLocalHost && qs.get('rest')) || SB_URL) + '/rest/v1';
+const DEMO = qs.has('demo');
+const RELAY = !DEMO && !window.SkyNative && (qs.has('relay') || /(^|\.)sonor\.co\.uk$/.test(location.hostname) || location.hostname.endsWith('github.io'));
+let bridgeId = (() => { try { return localStorage.getItem('skyBridge'); } catch { return null; } })();
+let bridges = [];
+
+async function rest(path, opts = {}) {
+  const r = await fetch(REST + path, { ...opts, headers: { apikey: SB_ANON, Authorization: 'Bearer ' + SB_ANON, 'Content-Type': 'application/json', ...(opts.headers || {}) } });
+  const t = await r.text(); const j = t ? JSON.parse(t) : null;
+  if (!r.ok) throw new Error((j && (j.message || j.error)) || r.statusText);
+  return j;
+}
+const sleepMs = (ms) => new Promise((r) => setTimeout(r, ms));
+function ago(ts) { if (!ts) return 'never'; const s = Math.round((Date.now() - new Date(ts)) / 1000); return s < 60 ? s + ' s ago' : s < 3600 ? Math.round(s / 60) + ' min ago' : Math.round(s / 3600) + ' h ago'; }
+
+async function loadBridges() {
+  bridges = await rest('/v_sky_bridges?select=id,name,version,last_seen,online&order=online.desc,last_seen.desc.nullslast');
+  if (!bridges.find((b) => b.id === bridgeId)) bridgeId = (bridges[0] || {}).id || null;
+  const pick = $('#bridgePick');
+  pick.hidden = false;
+  pick.innerHTML = bridges.length ? bridges.map((b) => `<option value="${esc(b.id)}" ${b.id === bridgeId ? 'selected' : ''}>${b.online ? '● ' : '○ '}${esc(b.name)}</option>`).join('') : '<option>No bridges yet</option>';
+}
+
+async function relayCall(action, payload) {
+  if (!bridgeId) throw new Error('No bridge linked yet. Start one on site with: node server.js --relay "Site name"');
+  const [row] = await rest('/sky_commands', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ bridge_id: bridgeId, action, payload: payload || {} }) });
+  const until = Date.now() + 15000;
+  while (Date.now() < until) {
+    await sleepMs(250);
+    const [c] = await rest(`/sky_commands?id=eq.${row.id}&select=status,code,result`);
+    if (c && c.status === 'done') { if (c.code >= 400) throw new Error((c.result && c.result.error) || 'failed'); return c.result; }
+    if (c && c.status === 'expired') break;
+  }
+  throw new Error('The site bridge did not answer. Check the Pi is powered and online.');
+}
+
+
+// ── Demo (?demo=1): four sample boxes, keys are shown instead of sent. Nothing touches a network. ──
+const demoState = { boxes: [
+  { ip: '192.168.1.35', name: 'Lounge Sky Q', model: 'Sky Q 2TB', hardware: 'ES240', power: 'on', port: 49160, controllable: true, notes: [] },
+  { ip: '192.168.1.36', name: 'Master Bedroom', model: 'Sky Q Mini', hardware: 'EM150', power: 'standby', port: 49160, controllable: true, notes: [] },
+  { ip: '192.168.1.37', name: 'Snug Sky+HD', model: 'Sky+HD', hardware: 'DRX890', power: 'on', port: 5900, controllable: true, notes: ['No status on Sky+HD, keys only.'] },
+  { ip: '192.168.1.38', name: 'Kitchen Sky Stream', model: 'Sky Stream', hardware: 'Puck', power: 'on', port: 0, controllable: false, notes: [] },
+], scan: { running: false, lastResult: { found: 4, subnets: ['192.168.1'] } } };
+async function demoApi(action, data = {}) {
+  await sleepMs(120);
+  const b = demoState.boxes.find((x) => x.ip === data.ip);
+  switch (action) {
+    case 'boxes': return demoState;
+    case 'key': toast('Demo: would send ' + data.keys.join(' ') + ' to ' + (b ? b.name : data.ip)); if (b && data.keys.includes('power')) b.power = b.power === 'on' ? 'standby' : 'on'; return { ok: true };
+    case 'scan': demoState.scan = { running: true, done: 0, total: 254 }; (async () => { for (let i = 0; i <= 254; i += 32) { demoState.scan.done = i; await sleepMs(150); } demoState.scan = { running: false, lastResult: { found: 4, subnets: data.subnets || ['192.168.1'] } }; })(); return { started: true };
+    case 'status': return { box: b };
+    case 'rename': if (b) b.name = data.name; return { ok: true };
+    case 'remove': demoState.boxes = demoState.boxes.filter((x) => x !== b); return { ok: true };
+    case 'add': { const nb = { ip: data.ip || '192.168.1.40', name: '', model: 'Sky Q 1TB', hardware: 'ES140', power: 'on', port: 49160, controllable: true, notes: [] }; demoState.boxes.push(nb); return { box: nb }; }
+  }
+  throw new Error('Not in the demo');
+}
+async function api(path, data) {
+  const action = path.replace(/^\/api\//, '');
+  if (DEMO) return demoApi(action, data);
+  if (window.SkyNative) return window.SkyNative.call(action, data);
+  if (RELAY) {
+    if (action === 'boxes') {
+      await loadBridges();
+      const b = bridges.find((x) => x.id === bridgeId);
+      if (!b) return { boxes: [], scan: {}, subnets: [] };
+      const [full] = await rest(`/v_sky_bridges?id=eq.${b.id}&select=state,online,last_seen`);
+      $('#bridgeHint').textContent = full.online ? `Bridge online · v${b.version || '?'}` : `Bridge offline (last seen ${ago(full.last_seen)})`;
+      bridgeState(full.online, full.online ? b.name : 'Bridge offline');
+      return { boxes: [], scan: {}, ...(full.state || {}), offline: !full.online };
+    }
+    return relayCall(action, data);
+  }
+  const r = await fetch(path, data === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+function toast(msg, err) { const t = $('#toast'); t.textContent = msg; t.className = 'toast show' + (err ? ' err' : ''); clearTimeout(t._h); t._h = setTimeout(() => t.className = 'toast', 2200); }
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function render() {
+  const list = $('#list');
+  if (!state.boxes.length) list.innerHTML = '<div class="empty">No boxes yet.</div>';
+  else list.innerHTML = state.boxes.map((b) => `
+    <div class="box ${b.ip === sel ? 'sel' : ''}" data-ip="${esc(b.ip)}">
+      <span class="dot ${esc(b.power)}" title="${esc(b.power)}"></span>
+      <div class="meta"><div class="name">${esc(b.name || b.model)}</div>
+      <div class="sub">${esc(b.ip)} · ${esc(b.name ? b.model : (b.hardware || ''))}</div></div>
+      ${b.controllable ? '' : `<span class="tag">${/Stream/.test(b.model) ? 'found · no IP control yet' : 'no remote port'}</span>`}
+    </div>`).join('');
+  list.querySelectorAll('.box').forEach((el) => el.onclick = () => { sel = el.dataset.ip; localStorage.setItem('skySel', sel); render(); });
+
+  const s = state.scan;
+  $('#scanBtn').disabled = !!s.running;
+  $('#prog').hidden = !s.running;
+  if (s.running) { $('#prog div').style.width = (100 * s.done / (s.total || 1)) + '%'; $('#scanState').textContent = 'Scanning… (SSDP and port sweep)'; }
+  else if (s.error) $('#scanState').textContent = 'Scan failed: ' + s.error;
+  else if (s.lastResult) $('#scanState').textContent = `Last scan found ${s.lastResult.found} box(es) on ${s.lastResult.subnets.map((x) => x + '.x').join(', ')}.`;
+  else $('#scanState').textContent = '';
+
+  const b = state.boxes.find((x) => x.ip === sel);
+  $('#remote').hidden = !b; $('#noSel').hidden = !!b;
+  document.querySelector('main').classList.toggle('has-sel', !!b);
+  if (b) {
+    $('#rName').textContent = b.name || b.model;
+    $('#rSub').textContent = [b.ip, b.model, b.hardware, 'power: ' + b.power, b.port ? 'port ' + b.port : ''].filter(Boolean).join(' · ') + ((b.notes && b.notes.length) ? ' — ' + b.notes.join(' ') : '');
+  }
+}
+
+async function refresh() { try { state = await api('/api/boxes'); if (!RELAY) bridgeState(true, DEMO ? 'Demo data' : window.SkyNative ? 'Direct' : 'Bridge'); render(); } catch (e) { bridgeState(false, 'Bridge offline'); toast('Cannot reach the Sky bridge: ' + e.message, true); } }
+async function poll() { await refresh(); if (state.scan.running) setTimeout(poll, 700); }
+
+async function send(keys) {
+  if (!sel) return;
+  try { await api('/api/key', { ip: sel, keys }); }
+  catch (e) { toast(e.message, true); }
+}
+
+$('#digits').innerHTML = [1,2,3,4,5,6,7,8,9,'',0,''].map((d) => d === '' ? '<span></span>' : `<button data-k="${d}">${d}</button>`).join('');
+document.querySelectorAll('[data-k]').forEach((btn) => btn.addEventListener('click', () => { send([btn.dataset.k]); if (navigator.vibrate) navigator.vibrate(10); }));
+
+$('#bridgePick').onchange = (e) => { bridgeId = e.target.value; try { localStorage.setItem('skyBridge', bridgeId); } catch {} refresh(); };
+$('#scanBtn').onclick = async () => { try { await api('/api/scan', {}); poll(); } catch (e) { toast(e.message, true); } };
+$('#scanSub').onclick = async () => { const subnets = $('#subnets').value.split(/[ ,]+/).filter(Boolean); if (!subnets.length) return toast('Enter a subnet', true); try { await api('/api/scan', { subnets }); poll(); } catch (e) { toast(e.message, true); } };
+$('#addBtn').onclick = async () => { try { const r = await api('/api/add', { ip: $('#addIp').value.trim() }); sel = r.box.ip; localStorage.setItem('skySel', sel); toast('Added ' + r.box.model); refresh(); } catch (e) { toast(e.message, true); } };
+$('#chanGo').onclick = () => { const v = $('#chan').value.replace(/\D/g, ''); if (v) send(v.split('')); $('#chan').value = ''; };
+$('#chan').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#chanGo').click(); e.stopPropagation(); });
+$('#refresh').onclick = async () => { try { await api('/api/status', { ip: sel }); refresh(); } catch (e) { toast(e.message, true); } };
+$('#rename').onclick = async () => { const b = state.boxes.find((x) => x.ip === sel); const n = prompt('Name for this box (e.g. Lounge Sky Q)', b?.name || ''); if (n === null) return; await api('/api/rename', { ip: sel, name: n }); refresh(); };
+$('#remove').onclick = async () => { if (!confirm('Remove this box from the list?')) return; await api('/api/remove', { ip: sel }); sel = null; refresh(); };
+
+const keymap = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'select', Backspace: 'backup', Escape: 'dismiss', p: 'power', h: 'home', g: 'tvguide', i: 'i', r: 'red', s: 'sky', PageUp: 'channelup', PageDown: 'channeldown' };
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT' || e.metaKey || e.ctrlKey) return;
+  let k = keymap[e.key] || (/^[0-9]$/.test(e.key) ? e.key : null);
+  if (e.key === ' ') { k = paused ? 'play' : 'pause'; paused = !paused; }
+  if (k) { e.preventDefault(); send([k]); }
+});
+
+if (DEMO) $('#demoBanner').hidden = false;
+refresh();
+setInterval(() => { if (!document.hidden && !state.scan.running) refresh(); }, 15000);
+</script>
+</body>
+</html>
