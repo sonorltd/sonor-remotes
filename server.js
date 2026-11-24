@@ -13,7 +13,7 @@ const path = require('path');
 
 const drivers = require('./lib/drivers');
 
-const VERSION = '2.3.0';
+const VERSION = '2.4.0';
 const PORT = Number(process.env.PORT || 8049);
 const DATA = path.join(__dirname, 'remote.json');
 const LEGACY = path.join(__dirname, 'boxes.json');
@@ -32,7 +32,7 @@ const pub = (d) => { const { auth, ...rest } = d; return { ...rest, paired: !!(a
 
 function upsert(dev) {
   const i = db.devices.findIndex((b) => b.ip === dev.ip);
-  if (i >= 0) { const o = db.devices[i]; db.devices[i] = { ...o, ...dev, name: o.name || dev.name, auth: o.driver === dev.driver ? o.auth : dev.auth }; }
+  if (i >= 0) { const o = db.devices[i]; db.devices[i] = { ...o, ...dev, name: o.name || dev.name, mac: dev.mac || o.mac || '', auth: o.driver === dev.driver ? o.auth : dev.auth }; }
   else db.devices.push(dev);
   save(db);
 }
@@ -94,7 +94,10 @@ const actions = {
   key: async ({ ip, keys } = {}) => {
     const d = find(ip); if (!d) return [404, { error: 'Unknown device' }];
     const list = Array.isArray(keys) ? keys : [keys];
-    try { for (const k of list) { await drv(d).send(d, String(k)); if (list.length > 1) await new Promise((r) => setTimeout(r, 300)); } save(db); return [200, { ok: true }]; }
+    try { for (const k of list) { await drv(d).send(d, String(k)); if (list.length > 1) await new Promise((r) => setTimeout(r, 300)); }
+      // two-way (v2.4.0): read the device back so the remote shows what really happened (volume, mute, input, power…)
+      if ((drivers.FEEDBACK[d.driver] || []).length) { await new Promise((r) => setTimeout(r, 250)); try { d.state = { ...(d.state || {}), ...(await drv(d).status(d)), at: new Date().toISOString() }; } catch { /* the key went; the read-back can wait for the next poll */ } changed(); }
+      save(db); return [200, { ok: true, device: pub(d) }]; }
     catch (e) { save(db); return [e.needsPair ? 409 : 502, { error: e.message, needsPair: !!e.needsPair }]; }
   },
 };

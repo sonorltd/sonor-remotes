@@ -139,6 +139,56 @@ main { display: block; max-width: 1100px; }
 .rtitle { display: flex; gap: 12px; align-items: center; justify-content: center; }
 .rtitle .name { font-weight: 700; font-size: 17px; }
 
+/* v2.4.0: the remote as a handset. Per-kind layout, live feedback strip, details and setup checklists */
+#remotePanel { background: radial-gradient(120% 60% at 50% 0%, color-mix(in srgb, var(--kc, #3A3A3C) 14%, transparent), transparent 70%), var(--card); padding: 22px 14px 18px; }
+.remote { max-width: 380px; gap: 14px; background: linear-gradient(180deg, #2b2b2e 0%, #1f1f22 55%, #1a1a1c 100%); border: 1px solid #3a3a3c; border-radius: 30px; padding: 22px 18px 18px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 -1px 0 rgba(0,0,0,.5) inset, 0 24px 48px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.35); position: relative; }
+.remote::before { content: ''; position: absolute; top: 9px; left: 50%; width: 44px; height: 4px; margin-left: -22px; border-radius: 4px; background: var(--kc, #48484a); box-shadow: 0 0 12px var(--kc, transparent); opacity: .85; }
+.rtitle { justify-content: flex-start; } .rtitle .name { font-size: 18px; letter-spacing: -.01em; }
+.live { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.pill { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; padding: 4px 9px; border-radius: 99px; background: #2c2c2e; border: 1px solid #3a3a3c; color: var(--label); }
+.pill b { color: var(--text); font-weight: 600; margin-left: 4px; } .pill.p-on { color: #2fbf71; border-color: rgba(47,191,113,.45); } .pill.p-standby, .pill.warn { color: var(--warn); border-color: rgba(227,167,47,.45); } .pill.bad { color: var(--bad); border-color: rgba(229,72,77,.45); text-transform: none; }
+.fb { margin-left: auto; font-family: var(--mono); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #636366; }
+.fb.on { color: #2fbf71; text-shadow: 0 0 10px rgba(47,191,113,.45); }
+.rb { background: linear-gradient(180deg, #3a3a3d, #2a2a2d); border: 1px solid #1a1a1c; box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 2px 4px rgba(0,0,0,.45); color: #f2f2f7; border-radius: 14px !important; padding: 12px 6px; font-size: 15px; transition: transform .06s, box-shadow .06s, background .15s; }
+.rb:active { transform: translateY(1px) scale(.97); box-shadow: 0 0 0 rgba(0,0,0,0), 0 1px 0 rgba(255,255,255,.04) inset; background: linear-gradient(180deg, #2a2a2d, #333336); }
+.rb.sm { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; padding: 10px 6px; }
+.toprow { display: grid; grid-template-columns: 58px 1fr 1fr; gap: 10px; align-items: center; } .onoff { display: flex; gap: 6px; justify-content: flex-end; } .onoff .rb { flex: 1; }
+.rb.pwr { width: 58px; height: 58px; border-radius: 50% !important; font-size: 22px; color: #ff6b6f; background: radial-gradient(circle at 50% 35%, #4a2326, #2a1416); border-color: #5c2a2f; box-shadow: 0 0 16px rgba(229,72,77,.25), 0 1px 0 rgba(255,255,255,.08) inset; }
+.rb.skyk { font-weight: 800; letter-spacing: .02em; text-transform: lowercase; background: linear-gradient(135deg, #e2343b, #ffb21a 45%, #3a7bfd) !important; border: 0; color: #fff; }
+.ring { position: relative; width: 216px; height: 216px; margin: 4px auto; border-radius: 50%; background: radial-gradient(circle, #2f2f32 0 36%, #252528 37% 100%); border: 1px solid #141416; box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 8px 18px rgba(0,0,0,.45); }
+.ring .rb { position: absolute; background: none; border: 0; box-shadow: none; color: #c7c7cc; font-size: 18px; width: 64px; height: 64px; border-radius: 50% !important; }
+.ring .rb:active { background: rgba(255,255,255,.06); }
+.r-up { top: 4px; left: 76px; } .r-down { bottom: 4px; left: 76px; } .r-left { left: 4px; top: 76px; } .r-right { right: 4px; top: 76px; }
+.ring .r-ok { left: 58px; top: 58px; width: 100px; height: 100px; background: linear-gradient(180deg, #3d3d40, #2b2b2e) !important; border: 1px solid #141416 !important; box-shadow: 0 1px 0 rgba(255,255,255,.1) inset, 0 4px 10px rgba(0,0,0,.5) !important; font-family: var(--mono); font-size: 14px; letter-spacing: .14em; color: #fff; }
+.sides.one { display: flex; justify-content: center; } .sides { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; justify-items: center; }
+.rocker { display: grid; grid-template-rows: 54px auto 54px; width: 66px; border-radius: 33px; background: linear-gradient(180deg, #333336, #262629); border: 1px solid #141416; box-shadow: 0 1px 0 rgba(255,255,255,.07) inset, 0 4px 10px rgba(0,0,0,.45); overflow: hidden; }
+.rocker .rb { background: none; border: 0; box-shadow: none; border-radius: 0 !important; font-size: 22px; padding: 0; }
+.rlab { display: grid; justify-items: center; font-family: var(--mono); font-size: 10px; letter-spacing: .16em; color: var(--label); padding: 4px 0; }
+.rlab b { font-size: 15px; color: var(--kc, #fff); letter-spacing: 0; }
+.rb.mute { width: 54px; height: 54px; border-radius: 50% !important; font-size: 18px; } .rb.mute.on { color: var(--warn); box-shadow: 0 0 14px rgba(227,167,47,.35); }
+.rb.wide { width: 100% !important; border-radius: 14px !important; height: auto; font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+.rk.big { width: 72px; height: 72px; border-radius: 50% !important; font-size: 26px; }
+.bigvol { text-align: center; } .bigvol .bv { font-size: 54px; font-weight: 300; line-height: 1; color: #fff; text-shadow: 0 0 24px color-mix(in srgb, var(--kc, #4bb9d3) 55%, transparent); font-variant-numeric: tabular-nums; }
+.vslide { display: grid; grid-template-columns: 1fr 34px; gap: 10px; align-items: center; } .vslide span { font-family: var(--mono); font-size: 12px; color: var(--label); text-align: right; }
+.vslide input { accent-color: var(--kc, var(--accent-c)); }
+.trans { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; } .trans .rb { flex: 1 1 44px; max-width: 64px; border-radius: 99px !important; font-size: 16px; } .recb { color: #ff6b6f; }
+.cols .rb { height: 16px; padding: 0; border-radius: 99px !important; }
+.chips button { border-radius: 99px; background: #2a2a2d; border-color: #3a3a3c; } .chips button.on { border-color: var(--kc, var(--accent-c)); color: #fff; background: color-mix(in srgb, var(--kc, var(--accent-c)) 22%, #2a2a2d); box-shadow: 0 0 12px color-mix(in srgb, var(--kc, var(--accent-c)) 30%, transparent); }
+.fold { margin: 0; border: 1px solid #333336; border-radius: 14px; background: rgba(0,0,0,.18); }
+.fold summary { padding: 10px 12px; font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--label); list-style: none; }
+.fold summary::-webkit-details-marker { display: none; } .fold summary::after { content: '+'; float: right; } .fold[open] summary::after { content: '−'; }
+.foldin { padding: 0 12px 12px; display: grid; gap: 10px; font-size: 13px; } .foldin ol, .foldin ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; } .small { font-size: 12px; }
+ul.chk { list-style: none; padding-left: 0 !important; } ul.chk li label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; } ul.chk input { margin-top: 2px; accent-color: var(--kc, #2fbf71); width: 17px; height: 17px; flex: none; } .unv { font-style: normal; font-family: var(--mono); font-size: 10px; color: var(--warn); border: 1px solid rgba(227,167,47,.4); border-radius: 99px; padding: 0 6px; margin-left: 4px; white-space: nowrap; } ul.chk em { display: block; font-style: normal; font-family: var(--mono); font-size: 10.5px; color: var(--label); margin-top: 2px; } ul.chk li:has(input:checked) span { color: var(--label); }
+.cbar { height: 4px; border-radius: 4px; background: #2c2c2e; overflow: hidden; } .cbar div { height: 100%; background: var(--kc, #2fbf71); box-shadow: 0 0 8px var(--kc, #2fbf71); }
+table.kv { width: 100%; border-collapse: collapse; } .kv th { text-align: left; font-family: var(--mono); font-weight: 400; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--label); padding: 6px 8px 6px 0; width: 34%; vertical-align: top; }
+.kv td { padding: 6px 0; border-top: 1px solid #2c2c2e; word-break: break-word; } .kv tr:first-child td { border-top: 0; } .kv code { font-family: var(--mono); font-size: 12.5px; }
+.remote .cp { margin-left: 8px; padding: 3px 9px; font-size: 10.5px; border-radius: 99px !important; font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase; vertical-align: 1px; }
+.acts { justify-content: space-between; flex-wrap: wrap; } .acts button { flex: 1; font-size: 12.5px; }
+.card { transition: transform .12s, box-shadow .12s, border-color .12s; } .card:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(0,0,0,.35), 0 0 0 1px color-mix(in srgb, var(--kc, #3a3a3c) 40%, transparent); }
+.card .dot.on { box-shadow: 0 0 8px var(--ok); }
+@media (max-width: 400px) { .ring { width: 192px; height: 192px; } .r-up, .r-down { left: 64px; } .r-left, .r-right { top: 64px; } .ring .r-ok { left: 50px; top: 50px; width: 90px; height: 90px; } }
+.ipgo { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-left: 4px; border-radius: 5px; border: 1px solid #3a3a3c; color: var(--s-audio, #4bb9d3); text-decoration: none; font-size: 12px; line-height: 1; vertical-align: 1px; } .ipgo:hover { background: rgba(75,185,211,.18); }
 </style>
 </head>
 <body>
@@ -177,7 +227,7 @@ main { display: block; max-width: 1100px; }
 </main>
 <div class="toast" id="toast"></div>
 <script>
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.4.0';
 if (window.SonorHeader) {
   SonorHeader.init({ appName: 'Remotes', repo: 'sonor-remotes' });
   const v = document.getElementById('nav-version'); if (v) v.textContent = 'v' + APP_VERSION;
@@ -263,6 +313,9 @@ const demoDevices = [
   { ip: '192.168.1.51', driver: 'sonos', make: 'Sonos', kind: 'Speaker', model: 'Sonos Era 100', name: 'Kitchen', paired: false, state: { power: 'on', volume: 18 }, caps: { keys: ['play', 'pause', 'prev', 'next', 'volup', 'voldown', 'mute'], volume: { min: 0, max: 100 }, inputs: [] } },
   { ip: '192.168.1.52', driver: 'sonos', make: 'Sonos', kind: 'Speaker', model: 'Sonos Amp', name: 'Garden', paired: false, state: { power: 'on', volume: 30 }, caps: { keys: ['play', 'pause', 'prev', 'next', 'volup', 'voldown', 'mute'], volume: { min: 0, max: 100 }, inputs: [] } },
 ];
+const DEMO_FB = { lg: ['power', 'volume', 'mute', 'input'], sony: ['power', 'volume', 'mute'], samsung: ['power'], roku: ['power'], sky: ['power'], denon: ['power', 'volume', 'mute', 'input', 'mode'], yamaha: ['power', 'volume', 'mute', 'input', 'mode'], onkyo: ['power', 'volume', 'mute', 'input'], pjlink: ['power', 'input', 'mute', 'lamp'], sonos: ['volume', 'mute', 'playing'], jvc: [] };
+const DEMO_OUI = { LG: 'A8:23:FE', Samsung: '8C:79:F5', Sony: 'FC:F1:52', Denon: '00:05:CD', Marantz: '00:06:78', Yamaha: '00:A0:DE', EPSON: '64:EB:8C', Sky: '7C:4C:A5', Roku: 'D8:31:34', Sonos: '48:A6:B8', Onkyo: '00:09:B0', Pioneer: '00:E0:36', JVC: 'E0:DA:DC', Panasonic: '00:80:45', NEC: '00:00:73' };
+demoDevices.forEach((d, i) => { d.caps.feedback = DEMO_FB[d.driver] || []; if (!d.mac && i % 7 !== 6) d.mac = (DEMO_OUI[d.make] || '02:00:00') + ':' + [i * 17 + 3, i * 29 + 11, i * 41 + 7].map((n) => (n % 256).toString(16).padStart(2, '0').toUpperCase()).join(':'); d.firmware = d.firmware || ['05.40.25', '1612.0.2', 'P2.20', '2.13.0'][i % 4]; d.state.at = new Date().toISOString(); });
 const demoState = { devices: demoDevices, scan: { running: false, lastResult: { found: demoDevices.length, subnets: ['192.168.1'], answered: 14 } }, drivers: [['sky', 'Sky'], ['denon', 'Denon / Marantz'], ['yamaha', 'Yamaha'], ['onkyo', 'Onkyo / Pioneer'], ['lg', 'LG'], ['samsung', 'Samsung'], ['sony', 'Sony'], ['roku', 'Roku'], ['sonos', 'Sonos'], ['pjlink', 'Projector (PJLink)'], ['jvc', 'JVC']].map(([id, make]) => ({ id, make })) };
 async function demoApi(action, data = {}) {
   await sleepMs(120);
@@ -271,7 +324,10 @@ async function demoApi(action, data = {}) {
     case 'devices': case 'boxes': return demoState;
     case 'key': { const k = [].concat(data.keys).join(' '); toast(`Demo: would send ${k} to ${d ? d.name : data.ip}`);
       if (d && /^power/.test(k)) d.state.power = k === 'poweroff' || (k === 'power' && d.state.power === 'on') ? 'standby' : 'on';
-      if (d && k.startsWith('vol:')) d.state.volume = Number(k.slice(4)); if (d && k.startsWith('input:')) d.state.input = k.slice(6); if (d && k.startsWith('mode:')) d.state.mode = k.slice(5); return { ok: true }; }
+      if (d && (d.caps.feedback || []).includes('volume') && d.state.volume != null) { if (k === 'volup') d.state.volume = Math.min((d.caps.volume || {}).max || 100, d.state.volume + 1); if (k === 'voldown') d.state.volume = Math.max(0, d.state.volume - 1); }
+      if (d && k === 'mute') d.state.mute = !d.state.mute; if (d && (k === 'play' || k === 'pause' || k === 'stop')) d.state.playing = { play: 'PLAYING', pause: 'PAUSED_PLAYBACK', stop: 'STOPPED' }[k];
+      if (d) d.state.at = new Date().toISOString();
+      if (d && k.startsWith('vol:')) d.state.volume = Number(k.slice(4)); if (d && k.startsWith('input:')) d.state.input = k.slice(6); if (d && k.startsWith('mode:')) d.state.mode = k.slice(5); return { ok: true, device: d }; }
     case 'pair': await sleepMs(900); d.paired = true; d.needsPair = false; d.caps.paired = true; return { device: d };
     case 'scan': demoState.scan = { running: true, done: 0, total: 254, phase: 'sweep' }; (async () => { for (let i = 0; i <= 254; i += 32) { demoState.scan.done = i; await sleepMs(150); } demoState.scan = { running: false, lastResult: { found: demoState.devices.length, subnets: data.subnets || ['192.168.1'], answered: 14 } }; })(); return { started: true };
     case 'status': return { device: d };
@@ -332,7 +388,7 @@ async function loadPlan(pid) {
   try {
     const [row] = await rest(`/network_configs?project_id=eq.${pid}&select=config`); const cfg = (row && row.config) || {};
     nm = { pid, devices: (cfg.devices || []).filter((d) => d.takeoffStatus !== 'removed').map((d) => ({ ip: planIp(cfg, d), mac: normMac(d.mac), room: d.room || d.location || '', device: d.device || '', service: d.service || '', make: (String(d.notes || '').split('·')[1] || '').trim(), label: [d.room || d.location, d.device].filter(Boolean).join(' · ') })) };
-    render();
+    render(); loadSetupTasks();
   } catch (e) { toast('Could not load the Network Map plan: ' + e.message, true); }
 }
 const PLAN_SVCS = new Set(['video', 'audio', 'cinema', 'control']);
@@ -355,6 +411,11 @@ function logo(d, big) {
   const txt = w ? WORDMARK[w] : (d.make || d.kind || '?').replace(/\s*\(.*\)/, '').split(/[ /]/)[0];
   return `<span class="logo${big ? ' big' : ''}" style="--bc:var(--line)"><span class="wm">${esc(txt)}</span></span>`;
 }
+// v2.4.0: every IP opens the device's own web page in the browser (the page each make serves, else http://ip)
+const WEB = { sonos: ':1400/support/review', roku: ':8060/query/device-info', sky: ':9006/as/system/information', lg: ':3000/', samsung: ':8001/api/v2/' };
+const webUrl = (d) => `http://${d.ip}${WEB[d.driver] || '/'}`;
+const ipLink = (d) => `<a class="ipgo" href="${esc(webUrl(d))}" target="_blank" rel="noopener" title="Open ${esc(webUrl(d))} in the browser">↗</a>`;
+document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('a.ipgo')) e.stopPropagation(); }, true);
 let kindFilter = '';
 // Kind → Sonor service (code + colour), same scheme as Engineering's service tabs.
 const KIND_SVC = { 'TV': ['03', 'var(--s-video)'], 'Projector': ['01', 'var(--s-cinema)'], 'AV receiver': ['02', 'var(--s-audio)'], 'Speaker': ['02', 'var(--s-audio)'], 'Satellite': ['03', 'var(--s-video)'], 'Streamer': ['03', 'var(--s-video)'] };
@@ -373,49 +434,118 @@ function renderList() {
   list.innerHTML = devs.map((d) => `
     <div class="card" data-ip="${esc(d.ip)}" role="button" tabindex="0" style="--kc:${kc(d.kind)}">
       ${logo(d)}
-      <div class="meta"><div class="name">${esc(title(d))}</div><div class="sub">${esc(d.kind)}${d.model && d.name ? ' · ' + esc(d.model) : ''}</div><div class="sub ip">${esc(d.ip)}${nmMatch(d) ? ' · <span title="Named from the project\'s Network Map">in plan</span>' : nm ? ' · <span style="color:var(--warn)" title="Not in the project\'s Network Map">not in plan</span>' : ''}</div></div>
+      <div class="meta"><div class="name">${esc(title(d))}</div><div class="sub">${esc(d.kind)}${d.model && d.name ? ' · ' + esc(d.model) : ''}</div><div class="sub ip">${esc(d.ip)} ${ipLink(d)}${(d.mac || (nmMatch(d) || {}).mac) ? ' · ' + esc(d.mac || nmMatch(d).mac) : ''}${nmMatch(d) ? ' · <span title="Named from the project\'s Network Map">in plan</span>' : nm ? ' · <span style="color:var(--warn)" title="Not in the project\'s Network Map">not in plan</span>' : ''}</div></div>
       <span class="dot ${esc(pow(d))}" title="${esc(pow(d))}"></span>
       ${d.caps && d.caps.pairable && !d.caps.paired ? '<span class="tag pair">pair</span>' : d.caps && !d.caps.keys.length ? '<span class="tag">no IP control</span>' : ''}
-    </div>`).join('') + (() => { const miss = plannedMissing(); return miss.length ? `<div class="empty" style="grid-column:1/-1;text-align:left"><b>In the Network Map plan but not found here (${miss.length})</b><div class="muted" style="margin:4px 0 8px">Switched off, on another VLAN, or not installed yet. Add one by IP to try it.</div>${miss.map((p) => `<div class="row" style="gap:8px;margin:4px 0"><span style="flex:1">${esc(p.label || p.device)} <span class="muted">${esc(p.ip)}</span></span><button data-addplan="${esc(p.ip)}">Add</button></div>`).join('')}</div>` : ''; })();
+    </div>`).join('') + (() => { const miss = plannedMissing(); return miss.length ? `<div class="empty" style="grid-column:1/-1;text-align:left"><b>In the Network Map plan but not found here (${miss.length})</b><div class="muted" style="margin:4px 0 8px">Switched off, on another VLAN, or not installed yet. Add one by IP to try it.</div>${miss.map((p) => `<div class="row" style="gap:8px;margin:4px 0"><span style="flex:1">${esc(p.label || p.device)} <span class="muted">${esc(p.ip)}</span> <a class="ipgo" href="http://${esc(p.ip)}/" target="_blank" rel="noopener">↗</a></span><button data-addplan="${esc(p.ip)}">Add</button></div>`).join('')}</div>` : ''; })();
   list.querySelectorAll('[data-addplan]').forEach((b) => b.onclick = async (e) => { e.stopPropagation(); b.disabled = true; try { const r = await api('/api/add', { ip: b.dataset.addplan }); toast('Added ' + title(r.device)); refresh(); } catch (err) { b.disabled = false; toast(err.message, true); } });
   list.querySelectorAll('.card').forEach((el) => { const open = () => { sel = el.dataset.ip; remember(sel); setView('remote'); try { history.pushState({ remote: 1 }, ''); } catch {} render(); if (!DEMO) api('/api/status', { ip: sel }).then(() => refresh()).catch(() => {}); }; el.onclick = open; el.onkeydown = (e) => { if (e.key === 'Enter') open(); }; });
 }
 
-// ── Remote: only the buttons this device's driver supports ──
-const B = (k, label, cls = '') => `<button data-k="${k}" class="${cls}">${label}</button>`;
-function remoteHtml(d) {
-  const c = d.caps || { keys: [], inputs: [] }; const has = (k) => c.keys.includes(k); const any = (...ks) => ks.some(has);
-  const st = d.state || {}; const parts = [];
-  parts.push(`<div class="rtitle">${logo(d, true)}<div><div class="name">${esc(title(d))}</div><div class="muted">${esc(sub(d))}${d.firmware ? ' · fw ' + esc(d.firmware) : ''}</div></div></div>`);
-  const sbits = [st.power && `Power <b>${esc(st.power)}</b>`, st.volume != null && `Volume <b>${esc(st.volume)}</b>`, st.mute && '<b>Muted</b>', st.input && `Input <b>${esc(((c.inputs || []).find((i) => i[0] === st.input) || [])[1] || st.input)}</b>`, st.mode && `Mode <b>${esc(st.mode)}</b>`, st.lamp && `Lamp <b>${esc(st.lamp)}</b>`, st.error && `<span style="color:var(--bad)">${esc(st.error)}</span>`].filter(Boolean);
-  if (sbits.length) parts.push(`<div class="stat">${sbits.map((x) => `<span>${x}</span>`).join('')}</div>`);
-  if (c.pairable && !c.paired) parts.push(`<div class="pairbox"><b>Pair with this ${esc(d.kind === 'TV' ? 'TV' : d.kind.toLowerCase())} first</b>${c.pairField ? `<input id="pairIn" placeholder="${esc(c.pairField)}">` : `<span>Press Pair, then accept the prompt on the ${esc(d.kind === 'TV' ? 'TV' : d.kind.toLowerCase())} within a minute.</span>`}<button id="pairGo" class="primary">Pair</button></div>`);
-  if (!c.keys.length) parts.push(`<div class="note">${esc(c.note || 'Found, but this model has no IP control we can use yet.')}</div>`);
-  const row1 = [has('power') && B('power', '⏻ Power', 'power'), has('poweron') && B('poweron', 'On'), has('poweroff') && B('poweroff', 'Off'), has('source') && B('source', 'Source'), has('sky') && B('sky', 'sky', 'sky'), has('home') && !has('up') && B('home', 'Home')].filter(Boolean);
-  if (row1.length) parts.push(`<div class="g g${Math.min(row1.length, 4)}">${row1.join('')}</div>`);
-  if (c.inputs && c.inputs.length) parts.push(`<div class="sect">Inputs</div><div class="chips">${c.inputs.map(([id, l]) => `<button data-k="input:${esc(id)}" class="${st.input === id ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`);
-  if (has('up')) {
-    parts.push(`<div class="dpad"><span></span>${B('up', '▲')}<span></span>${B('left', '◀')}${B('select', 'OK', 'ok')}${B('right', '▶')}<span></span>${B('down', '▼')}<span></span></div>`);
-    const nav = [['back', 'Back'], ['home', 'Home'], ['menu', 'Menu'], ['info', 'Info'], ['guide', 'Guide'], ['exit', 'Exit'], ['search', 'Search'], ['text', 'Text'], ['replay', 'Replay']].filter(([k]) => has(k)).map(([k, l]) => B(k, l));
-    if (nav.length) parts.push(`<div class="g g3">${nav.join('')}</div>`);
-  }
-  const vol = [has('voldown') && B('voldown', 'VOL −'), has('mute') && B('mute', st.mute ? 'Unmute' : 'Mute'), has('volup') && B('volup', 'VOL +')].filter(Boolean);
-  const ch = [has('chdown') && B('chdown', 'CH ▼'), has('chup') && B('chup', 'CH ▲')].filter(Boolean);
-  if (vol.length) parts.push(`<div class="g g${vol.length}">${vol.join('')}</div>`);
-  if (ch.length) parts.push(`<div class="g g${ch.length}" style="grid-template-columns:repeat(${ch.length},1fr)">${ch.join('')}</div>`);
-  if (c.volume) parts.push(`<input type="range" id="volSlide" min="${c.volume.min}" max="${c.volume.max}" value="${st.volume ?? Math.round((c.volume.min + c.volume.max) / 4)}">`);
-  const tr = [['rew', '⏪'], ['prev', '⏮'], ['play', '▶'], ['pause', '⏸'], ['stop', '⏹'], ['next', '⏭'], ['ff', '⏩'], ['rec', '⏺']].filter(([k]) => has(k)).map(([k, l]) => B(k, l));
-  if (tr.length) parts.push(`<div class="g" style="grid-template-columns:repeat(${tr.length <= 5 ? tr.length : Math.ceil(tr.length / 2)},1fr)">${tr.join('')}</div>`);
-  if (CL.every(has)) parts.push(`<div class="g g4">${B('red', '&nbsp;', 'c-red')}${B('green', '&nbsp;', 'c-green')}${B('yellow', '&nbsp;', 'c-yellow')}${B('blue', '&nbsp;', 'c-blue')}</div>`);
-  if (DG.every(has)) parts.push(`<div class="g g3">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => B(String(n), n)).join('')}<span></span>${B('0', '0')}<span></span></div><div class="row"><input id="chan" placeholder="Channel number" inputmode="numeric"><button id="chanGo" class="primary">Go</button></div>`);
-  if (c.modes && c.modes.length) parts.push(`<div class="sect">Sound mode</div><div class="chips">${c.modes.map(([id, l]) => `<button data-k="mode:${esc(id)}" class="${st.mode === id ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>`);
-  const extra = [['zone2on', 'Zone 2 on'], ['zone2off', 'Zone 2 off'], ['boxoffice', 'Box Office']].filter(([k]) => has(k)).map(([k, l]) => B(k, l));
-  if (extra.length) parts.push(`<div class="g g3">${extra.join('')}</div>`);
-  if (c.apps && c.apps.length) parts.push(`<div class="sect">Apps</div><div class="chips">${c.apps.map(([id, l]) => `<button data-k="app:${esc(id)}">${esc(l)}</button>`).join('')}</div>`);
-  if (c.note && c.keys.length) parts.push(`<div class="note">${esc(c.note)}</div>`);
-  parts.push(`<div class="row" style="justify-content:space-between;flex-wrap:wrap"><button id="refresh">Refresh status</button><button id="rename">Rename</button>${c.wake !== undefined || has('poweron') ? '<button id="setmac">MAC</button>' : ''}<button id="remove">Remove</button></div>`);
-  return parts.join('');
+// ── Remote (v2.4.0): laid out per kind of device, only the controls its driver really has, live two-way feedback ──
+const B = (k, label, cls = '', t = '') => `<button data-k="${k}" class="rb ${cls}"${t ? ` title="${esc(t)}"` : ''}>${label}</button>`;
+const PROTO = { sky: 'Sky remote port 49160 (Q) / 5900 (+HD)', denon: 'Telnet 23', yamaha: 'Yamaha YXC, web 80', onkyo: 'eISCP 60128', lg: 'webOS SSAP 3000 / 3001', samsung: 'Tizen remote 8001 / 8002', sony: 'Sony IRCC + REST, web 80', roku: 'Roku ECP 8060', sonos: 'UPnP 1400', pjlink: 'PJLink 4352', jvc: 'JVC remote 20554' };
+const FB_LABEL = { power: 'power', volume: 'volume', mute: 'mute', input: 'input', mode: 'sound mode', lamp: 'lamp hours', playing: 'play state' };
+// Sky installer menus: codes typed on the remote once the right screen is up (Bryn 2026-11-24: "tips on sky remote for 001")
+// Installer menus and Control4 checklists: data/c4-tips.json (researched with sources, 2026-11-24; master /mnt/project-files/remotes/c4-tips.json)
+let C4_FILE = null; fetch('data/c4-tips.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.devices) { C4_FILE = j; lastRemote = ''; render(); } }).catch(() => {});
+const tipsKey = (d) => (/apple ?tv/i.test(`${d.make} ${d.model}`) ? 'appletv' : d.driver);
+const fileKey = (d) => (d.driver === 'sky' ? (/stream|glass/i.test(d.model || '') ? 'sky_stream' : 'sky_' + (skyKind(d) || 'q')) : tipsKey(d));
+// ── Setup checklist → Tasks (v2.4.0). One task per device per project in tasks_general (external_source 'remotes',
+// external_id 'c4setup|<MAC or IP>'), ticks carry who and when, so Tasks, Site and the office see the same progress
+// whichever app it was ticked in. No project picked (or demo): ticks stay on this device until a project is chosen.
+const slug = (t) => String(t).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 48);
+const devKey = (d) => 'c4setup|' + (normMac(d.mac || (nmMatch(d) || {}).mac) || d.ip);
+let setupTasks = {}; // external_id → task row
+const localChk = () => { try { return JSON.parse(localStorage.getItem('remotesChecks') || '{}'); } catch { return {}; } };
+function checklistItems(d) { if (!C4_FILE) return []; const F = C4_FILE.devices[fileKey(d)] || {};
+  const map = (arr, all) => (arr || []).map((t) => ({ id: t.id, text: t.text, verified: t.verified !== false, all }));
+  return [...map(F.tasks, false), ...map(C4_FILE.all_tasks, true)]; }
+function ticks(d) { const t = setupTasks[devKey(d)]; if (t) return Object.fromEntries(((t.metadata || {}).checklist || []).filter((c) => c.done).map((c) => [c.id, c])); return localChk()[devKey(d)] || {}; }
+async function loadSetupTasks() {
+  setupTasks = {}; if (DEMO || !nm || !SIGNED_IN()) return;
+  try { const rows = await rest(`/tasks_general?project_id=eq.${nm.pid}&external_source=eq.remotes&select=id,external_id,status,metadata,updated_at`); rows.forEach((r) => { setupTasks[r.external_id] = r; }); lastRemote = ''; render(); } catch { /* offline: local ticks */ }
 }
+async function tick(d, id, on) {
+  const items = checklistItems(d); const key = devKey(d); const who = (AUTH.user() || {}).email || (window.SonorHeader && SonorHeader.user && SonorHeader.user()) || ''; const now = new Date().toISOString();
+  const cur = ticks(d); if (on) cur[id] = { id, done: true, by: who, at: now }; else delete cur[id];
+  if (!nm || DEMO || !SIGNED_IN()) { const L = localChk(); L[key] = cur; try { localStorage.setItem('remotesChecks', JSON.stringify(L)); } catch {} lastRemote = ''; render(); return; }
+  const list = items.map((it) => ({ id: it.id, text: it.text, done: !!cur[it.id], by: (cur[it.id] || {}).by || null, at: (cur[it.id] || {}).at || null }));
+  const n = list.filter((x) => x.done).length; const status = n === 0 ? 'todo' : n === list.length ? 'done' : 'in_progress';
+  const plan = nmMatch(d) || {};
+  const body = { project_id: nm.pid, service_nn: Number((KIND_SVC[d.kind] || ['10'])[0]), title: `Control4 setup · ${title(d)}`, status, external_source: 'remotes', external_id: key, last_synced_at: now,
+    description: list.map((x) => `- [${x.done ? 'x' : ' '}] ${x.text}`).join('\n'),
+    metadata: { app: 'remotes', app_version: APP_VERSION, kind: 'c4-setup', device: { ip: d.ip, mac: normMac(d.mac || plan.mac) || null, make: d.make, model: d.model, kind: d.kind, name: title(d), room: plan.room || null, driver: d.driver }, checklist: list, tips_version: (C4_FILE && C4_FILE.version) || 'draft', updated_by: who } };
+  try {
+    const ex = setupTasks[key];
+    const [row] = ex ? await rest(`/tasks_general?id=eq.${ex.id}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify(body) })
+      : await rest('/tasks_general', { method: 'POST', headers: { Prefer: 'return=representation' }, body: JSON.stringify(body) });
+    if (row) setupTasks[key] = row; toast(on ? 'Ticked, saved to the project\'s Tasks' : 'Unticked');
+  } catch (e) { toast('Could not save to Tasks: ' + e.message, true); }
+  lastRemote = ''; render();
+}
+function c4Tips(d) {
+  const items = checklistItems(d); const tk = ticks(d); const done = items.filter((it) => tk[it.id]).length; const F = C4_FILE && C4_FILE.devices[fileKey(d)];
+  const src = F && F.sources && F.sources.length ? `<div class="muted small">Checked ${esc(C4_FILE.version || '')}: ${F.sources.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">source ${i + 1}</a>`).join(' · ')}</div>` : '';
+  if (!items.length) return '<details class="fold tips"><summary>🎛 Control4 setup</summary><div class="foldin muted small">The setup checklist did not load (data/c4-tips.json).</div></details>';
+  const where = DEMO ? 'Demo: ticks stay on this device.' : nm && SIGNED_IN() ? 'Saved to this project\'s Tasks with your name, so the office and Site see it.' : 'Pick a project (signed in) to save ticks to its Tasks; until then they stay on this device.';
+  const li = (it) => { const t = tk[it.id]; return `<li><label><input type="checkbox" data-chk="${esc(it.id)}" ${t ? 'checked' : ''}><span>${esc(it.text)}${it.verified ? '' : ' <i class="unv">check on the model</i>'}${t && t.by ? `<em>${esc(String(t.by).split('@')[0])} · ${esc(ago(t.at))}</em>` : ''}</span></label></li>`; };
+  return `<details class="fold tips"${done && done < items.length ? ' open' : ''}><summary>🎛 Control4 setup · ${done}/${items.length}</summary><div class="foldin"><div class="cbar"><div style="width:${Math.round(100 * done / (items.length || 1))}%"></div></div><ul class="chk">${items.filter((i) => !i.all).map(li).join('')}</ul><div class="sect">Every device</div><ul class="chk">${items.filter((i) => i.all).map(li).join('')}</ul><div class="muted small">${where} Menu names move between model years; the setting to look for is the same.</div>${src}</div></details>`;
+}
+const skyKind = (d) => (d.driver === 'sky' && d.caps && d.caps.keys.length ? (/\+|hd|drx/i.test(d.model || '') && !/q/i.test(d.model || '') ? 'hd' : 'q') : null);
+function rocker(dn, up, label, live) { return `<div class="rocker">${up}<span class="rlab">${label}${live != null ? `<b>${esc(live)}</b>` : ''}</span>${dn}</div>`; }
+function remoteHtml(d) {
+  const c = d.caps || { keys: [], inputs: [] }; const has = (k) => c.keys.includes(k); const st = d.state || {}; const fb = c.feedback || []; const kind = d.kind || ''; const P = [];
+  const plan = nmMatch(d) || {}; const mac = d.mac || plan.mac || '';
+  // head
+  P.push(`<div class="rtitle">${logo(d, true)}<div><div class="name">${esc(title(d))}</div><div class="muted">${esc([plan.room, kind, d.make && d.model && !String(d.model).startsWith(d.make) ? d.make + ' ' + d.model : d.model || d.make].filter(Boolean).join(' · '))}</div></div></div>`);
+  // live strip: only what this device reports back
+  const fbOn = fb.length && !DEMO_ONEWAY(d); const age = st.at ? Math.round((Date.now() - new Date(st.at)) / 1000) : null;
+  const pills = [st.power && `<span class="pill p-${esc(st.power)}">${esc(st.power)}</span>`, fb.includes('volume') && st.volume != null && `<span class="pill">Vol <b>${esc(st.volume)}</b></span>`, st.mute && '<span class="pill warn">Muted</span>', st.input && `<span class="pill">${esc(((c.inputs || []).find((i) => i[0] === st.input) || [])[1] || st.input)}</span>`, st.mode && `<span class="pill">${esc(((c.modes || []).find((i) => i[0] === st.mode) || [])[1] || st.mode)}</span>`, st.playing && `<span class="pill">${esc(String(st.playing).toLowerCase().replace(/_/g, ' '))}</span>`, st.lamp && `<span class="pill">Lamp <b>${esc(st.lamp)}</b></span>`, st.error && `<span class="pill bad">${esc(st.error)}</span>`].filter(Boolean);
+  P.push(`<div class="live">${pills.join('')}<span class="fb ${fbOn ? 'on' : ''}" title="${fbOn ? 'Reads back: ' + fb.map((f) => FB_LABEL[f] || f).join(', ') : 'This device does not report its state over IP: keys are sent one way'}">${fbOn ? `● Live${age != null && age < 600 ? ` · ${age < 5 ? 'now' : age + ' s'}` : ''}` : '○ One-way'}</span></div>`);
+  if (c.pairable && !c.paired) P.push(`<div class="pairbox"><b>Pair with this ${esc(kind === 'TV' ? 'TV' : kind.toLowerCase())} first</b>${c.pairField ? `<input id="pairIn" placeholder="${esc(c.pairField)}">` : `<span>Press Pair, then accept the prompt on the ${esc(kind === 'TV' ? 'TV' : kind.toLowerCase())} within a minute.</span>`}<button id="pairGo" class="primary">Pair</button></div>`);
+  if (!c.keys.length) P.push(`<div class="note">${esc(c.note || 'Found, but this model has no IP control we can use yet.')}</div>`);
+  // power: one toggle if the device has it, otherwise discrete on / off
+  const pw = has('power') ? B('power', '⏻', 'pwr', 'Power') : ''; const onoff = [has('poweron') && B('poweron', 'On', 'sm'), has('poweroff') && B('poweroff', 'Off', 'sm')].filter(Boolean).join('');
+  const topExtra = [has('sky') && B('sky', 'sky', 'skyk'), has('source') && B('source', 'Source', 'sm'), has('home') && !has('up') && B('home', 'Home', 'sm')].filter(Boolean).join('');
+  if (pw || onoff || topExtra) P.push(`<div class="toprow">${pw}<div class="onoff">${has('power') ? '' : onoff}</div><div class="onoff">${topExtra}</div></div>`);
+  const inputs = (c.inputs || []).length ? `<div class="sect">${kind === 'Projector' || kind === 'AV receiver' ? 'Inputs' : 'Inputs'}</div><div class="chips">${c.inputs.map(([id, l]) => `<button data-k="input:${esc(id)}" class="${st.input === id ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>` : '';
+  const dpad = has('up') ? `<div class="ring">${B('up', '▲', 'r-up')}${B('left', '◀', 'r-left')}${B('select', 'OK', 'r-ok')}${B('right', '▶', 'r-right')}${B('down', '▼', 'r-down')}</div>` : '';
+  const nav = [['back', 'Back'], ['home', 'Home'], ['menu', 'Menu'], ['info', 'Info'], ['guide', 'Guide'], ['exit', 'Exit'], ['search', d.driver === 'sky' ? 'Services' : 'Search'], ['text', 'Text'], ['replay', 'Replay']].filter(([k]) => has(k) && !(k === 'home' && !has('up'))).map(([k, l]) => B(k, l, 'sm'));
+  const navHtml = nav.length ? `<div class="g g${Math.min(nav.length, 3)}">${nav.join('')}</div>` : '';
+  const vol = (has('volup') || has('voldown')) ? rocker(B('voldown', '−', 'rk'), B('volup', '+', 'rk'), 'VOL', fb.includes('volume') ? st.volume : null) : '';
+  const ch = (has('chup') || has('chdown')) ? rocker(B('chdown', '−', 'rk'), B('chup', '+', 'rk'), 'CH') : '';
+  const mute = has('mute') ? B('mute', st.mute ? '🔇' : '🔈', 'mute' + (st.mute ? ' on' : ''), kind === 'Projector' ? 'Picture mute' : 'Mute') : '';
+  const slider = c.volume ? `<div class="vslide"><input type="range" id="volSlide" min="${c.volume.min}" max="${c.volume.max}" value="${st.volume ?? Math.round((c.volume.min + c.volume.max) / 4)}"><span id="volVal">${st.volume ?? ''}</span></div>` : '';
+  const trk = [['rew', '⏪'], ['prev', '⏮'], ['play', '▶'], ['pause', '⏸'], ['stop', '⏹'], ['next', '⏭'], ['ff', '⏩'], ['rec', '⏺']].filter(([k]) => has(k)).map(([k, l]) => B(k, l, k === 'rec' ? 'tr recb' : 'tr'));
+  const trHtml = trk.length ? `<div class="trans">${trk.join('')}</div>` : '';
+  const colours = ['red', 'green', 'yellow', 'blue'].every(has) ? `<div class="g g4 cols">${B('red', '', 'c-red')}${B('green', '', 'c-green')}${B('yellow', '', 'c-yellow')}${B('blue', '', 'c-blue')}</div>` : '';
+  const digits = '0123456789'.split('').every(has) ? `<div class="g g3 digits">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => B(String(n), n, 'sm')).join('')}<span></span>${B('0', '0', 'sm')}<span></span></div><div class="row"><input id="chan" placeholder="Channel number" inputmode="numeric"><button id="chanGo" class="primary">Go</button></div>` : '';
+  const modes = c.modes && c.modes.length ? `<div class="sect">Sound mode</div><div class="chips">${c.modes.map(([id, l]) => `<button data-k="mode:${esc(id)}" class="${st.mode === id ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>` : '';
+  const extra = [['zone2on', 'Zone 2 on'], ['zone2off', 'Zone 2 off'], ['boxoffice', 'Box Office']].filter(([k]) => has(k)).map(([k, l]) => B(k, l, 'sm'));
+  const extraHtml = extra.length ? `<div class="g g${Math.min(extra.length, 3)}">${extra.join('')}</div>` : '';
+  const apps = c.apps && c.apps.length ? `<div class="sect">Apps</div><div class="chips">${c.apps.map(([id, l]) => `<button data-k="app:${esc(id)}">${esc(l)}</button>`).join('')}</div>` : '';
+  const sideBy = (a, b, m) => { const n = [a, m, b].filter(Boolean); return !n.length ? '' : n.length === 1 ? `<div class="sides one">${n[0]}</div>` : `<div class="sides">${a || '<span></span>'}<div class="mid">${m || ''}</div>${b || '<span></span>'}</div>`; };
+  const fold = (label, html) => (html ? `<details class="fold"><summary>${label}</summary><div class="foldin">${html}</div></details>` : '');
+  if (kind === 'AV receiver') {        // volume first: big dial, inputs, modes; the setup menu folded away
+    P.push(`<div class="bigvol"><div class="bv">${fb.includes('volume') && st.volume != null ? esc(st.volume) : '—'}</div><div class="muted">Volume${fb.includes('volume') ? '' : ' (not reported)'}</div></div>`, sideBy(B('voldown', '−', 'rk big'), B('volup', '+', 'rk big'), mute), slider, inputs, modes, extraHtml, fold('Setup menu (on-screen)', dpad + navHtml));
+  } else if (kind === 'Speaker') {     // now playing
+    P.push(trHtml, sideBy(B('voldown', '−', 'rk big'), B('volup', '+', 'rk big'), mute), slider, inputs);
+  } else if (kind === 'Projector') {   // power, input, picture mute: nothing else over IP
+    P.push(inputs, mute ? `<div class="g g1">${mute.replace('class="rb mute', 'class="rb wide mute').replace(/>🔇<|>🔈</, st.mute ? '>Picture on<' : '>Picture mute<')}</div>` : '', dpad, navHtml);
+  } else {                              // TV, Satellite, Streamer
+    P.push(inputs, dpad, navHtml, sideBy(vol, ch, mute), slider, trHtml, colours, apps, kind === 'Satellite' ? digits : fold('Number pad', digits), extraHtml);
+  }
+  const sk = skyKind(d); const FI = C4_FILE && (C4_FILE.devices[fileKey(d)] || {}).installer; if (FI) { const t = { title: FI.title, steps: (FI.steps || []).map(esc), macro: (FI.codes || []).filter(([k]) => k.split(',').every((x) => /^\d$/.test(x) || c.keys.includes(x))) }; P.push(`<details class="fold tips"><summary>🛠 ${t.title}</summary><div class="foldin"><ol>${t.steps.map((s) => `<li>${s}</li>`).join('')}</ol><div class="g g2">${t.macro.map(([k, l]) => `<button class="rb sm" data-keys="${k}">${l}</button>`).join('')}</div></div></details>`); }
+  P.push(c4Tips(d));
+  if (c.note && c.keys.length) P.push(`<div class="note">${esc(c.note)}</div>`);
+  // details: what it is and how it is reached
+  const rows = [['IP', `<code>${esc(d.ip)}</code> ${ipLink(d)}<button class="cp" data-copy="${esc(d.ip)}">Copy</button>`], ['MAC', mac ? `<code>${esc(mac)}</code><button class="cp" data-copy="${esc(mac)}">Copy</button>${!d.mac && plan.mac ? ' <span class="muted">from Network Map</span>' : ''}` : `<span class="muted">not known${has('poweron') ? ': needed to wake it from off' : ''}</span>`], ['Make / model', esc((d.model && d.make && String(d.model).toLowerCase().startsWith(String(d.make).toLowerCase()) ? d.model : [d.make, d.model].filter(Boolean).join(' ')) || '—')], d.firmware && ['Firmware', esc(d.firmware)], d.serial && ['Serial', `<code>${esc(d.serial)}</code>`], d.hardware && ['Hardware', esc(d.hardware)], ['Control', esc(PROTO[d.driver] || d.driver || '—')], ['Feedback', fb.length ? esc(fb.map((f) => FB_LABEL[f] || f).join(', ')) : 'none (one-way)'], plan.label && ['Network Map', esc(plan.label)], c.pairable && ['Pairing', c.paired ? 'paired' : 'not paired']].filter(Boolean);
+  P.push(`<details class="fold info" open><summary>Device details</summary><div class="foldin"><table class="kv">${rows.map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('')}</table></div></details>`);
+  P.push(`<div class="row acts"><button id="refresh">Refresh</button><button id="rename">Rename</button><button id="setmac">${mac ? 'Edit MAC' : 'Add MAC'}</button><button id="remove">Remove</button></div>`);
+  return P.filter(Boolean).join('');
+}
+const DEMO_ONEWAY = () => false;
 let lastRemote = '';
 function render() {
   renderList();
@@ -435,7 +565,10 @@ function render() {
 }
 function wireRemote(d) {
   $('#remote').querySelectorAll('[data-k]').forEach((b) => b.onclick = () => { send([b.dataset.k]); if (navigator.vibrate) navigator.vibrate(10); });
-  const vs = $('#volSlide'); if (vs) vs.onchange = () => send(['vol:' + vs.value]);
+  $('#remote').querySelectorAll('[data-chk]').forEach((b) => b.onchange = () => tick(d, b.dataset.chk, b.checked));
+  $('#remote').querySelectorAll('[data-keys]').forEach((b) => b.onclick = () => send(b.dataset.keys.split(',')));
+  $('#remote').querySelectorAll('[data-copy]').forEach((b) => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast('Copied ' + b.dataset.copy); } catch { toast(b.dataset.copy); } });
+  const vs = $('#volSlide'); if (vs) { vs.oninput = () => { const v = $('#volVal'); if (v) v.textContent = vs.value; }; vs.onchange = () => send(['vol:' + vs.value]); }
   const cg = $('#chanGo'); if (cg) { cg.onclick = () => { const v = $('#chan').value.replace(/\D/g, ''); if (v) send(v.split('')); $('#chan').value = ''; }; $('#chan').onkeydown = (e) => { e.stopPropagation(); if (e.key === 'Enter') cg.click(); }; }
   const pg = $('#pairGo'); if (pg) pg.onclick = async () => { pg.disabled = true; pg.textContent = 'Waiting for the device…'; const v = $('#pairIn') ? $('#pairIn').value.trim() : ''; try { await api('/api/pair', { ip: d.ip, psk: v, password: v }); toast('Paired'); lastRemote = ''; refresh(); } catch (e) { toast(e.message, true); pg.disabled = false; pg.textContent = 'Pair'; } };
   $('#refresh').onclick = async () => { try { await api('/api/status', { ip: d.ip }); lastRemote = ''; refresh(); } catch (e) { toast(e.message, true); } };
@@ -448,7 +581,7 @@ async function refresh() { try { state = await api('/api/devices'); if (!RELAY) 
 async function poll() { await refresh(); if ((state.scan || {}).running) setTimeout(poll, 700); }
 async function send(keys) {
   if (!sel) return;
-  try { await api('/api/key', { ip: sel, keys }); if (DEMO) { lastRemote = ''; render(); } }
+  try { const r = await api('/api/key', { ip: sel, keys }); if (r && r.device) { const i = (state.devices || []).findIndex((x) => x.ip === r.device.ip); if (i >= 0) state.devices[i] = r.device; } lastRemote = ''; render(); }
   catch (e) { toast(e.message, true); if (e.needsPair) { lastRemote = ''; refresh(); } }
 }
 
@@ -472,6 +605,13 @@ document.addEventListener('keydown', (e) => {
   if (k && d.caps && d.caps.keys.includes(k)) { e.preventDefault(); send([k]); }
 });
 
+// two-way: while a remote is open, read the device back every few seconds (only devices that report state)
+let livePoll = null; setInterval(async () => {
+  if (DEMO || livePoll || document.hidden || $('#views').dataset.view !== 'remote' || !sel) return; const d = (state.devices || []).find((x) => x.ip === sel);
+  if (!d || !((d.caps || {}).feedback || []).length) return; livePoll = true;
+  try { const r = await api('/api/status', { ip: sel }); if (r && r.device) { const i = state.devices.findIndex((x) => x.ip === r.device.ip); if (i >= 0) state.devices[i] = r.device; render(); } } catch {} livePoll = null;
+}, RELAY ? 8000 : 4000);
+setInterval(() => { if ($('#views').dataset.view === 'remote') { const f = $('#remote .fb.on'); const d = (state.devices || []).find((x) => x.ip === sel); if (f && d && d.state && d.state.at) { const a = Math.round((Date.now() - new Date(d.state.at)) / 1000); f.textContent = '● Live · ' + (a < 5 ? 'now' : a + ' s'); } } }, 1000);
 if (DEMO) $('#demoBanner').hidden = false;
 refresh(); loadProjects(); reportVersion();
 function renderSign() {

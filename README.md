@@ -1,4 +1,4 @@
-# Remotes (Sonor) · v2.1.0
+# Remotes (Sonor) · v2.4.0
 
 Finds controllable AV kit on the site network (Sky, Denon / Marantz, Yamaha, Onkyo / Pioneer, LG, Samsung, Sony, Roku, Sonos,
 PJLink and JVC projectors) and gives each one a remote with only the buttons it supports. Opens on **Discovered**: every device
@@ -15,6 +15,13 @@ Two ways to use the same page:
 - **Hosted:** `https://apps.sonor.co.uk/sonor-remotes/` (Cloudflare login like every Sonor app). Pick a bridge from the list; commands go through Supabase (`sky_commands`) to the bridge, which makes only outbound HTTPS calls, so nothing needs opening on the site router. About half a second per key press.
 
 A browser can't open the TCP connection a Sky box needs, so a bridge on site always does the actual talking.
+
+## v2.4.0 (2026-11-24)
+- **Handset look, per kind of device**: TVs, Sky and streamers get the D-pad ring, rockers and transport; receivers open on a big volume readout with inputs and sound modes (setup menu folded away); projectors show only power, inputs and picture mute; Sonos shows play controls and volume. Only keys the driver really has are drawn.
+- **Two-way feedback**: each driver says what it reads back (`caps.feedback`). After every key the bridge reads the device again, and an open remote refreshes every 4 s (8 s via the relay). The strip shows power, volume, mute, input, mode, lamp hours, with "Live" or "One-way".
+- **Device details**: IP and MAC (copy buttons; MAC from the ARP table on discovery, kept on rescans, or from the Network Map), make/model, firmware, serial, control protocol and port, what it reports back.
+- **Sky installer menus and Control4 setup checklists** from `public/data/c4-tips.json` (researched with sources; master in project files `remotes/c4-tips.json`). One-tap code buttons for the installer menus.
+- **Checklist → Tasks**: with a project picked and signed in, ticks save to `tasks_general` (one task per device, `external_source` `remotes`, `external_id` `c4setup|<MAC or IP>`, ticks carry who and when), so Tasks, Site and the office see the same progress. Without a project they stay on the device.
 
 ## Pi test rig
 

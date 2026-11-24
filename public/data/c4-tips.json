@@ -1,0 +1,786 @@
+{
+ "version": "2026-11-24",
+ "all": [
+  "Give every controlled device a DHCP reservation (or static IP outside the pool) before adding it in Composer.",
+  "Wire it if it has an Ethernet port. Several TVs only wake over LAN (Wake-on-LAN) when wired.",
+  "Turn HDMI-CEC off on TVs, AVRs and sources unless the driver needs it. CEC fights the control system (inputs and power changing on their own).",
+  "Set network/IP standby to the 'always on' option so the device can be turned on over IP. It uses a little more standby power.",
+  "Turn off eco / auto power off / auto standby timers so devices don't sleep or drop off the network behind Control4's back.",
+  "Turn on Control4 SDDP where the device offers it (Epson, JVC, LG, Sonos) so the driver follows IP changes.",
+  "Note the MAC address and any pairing key or password in the site network map, never in the driver notes.",
+  "After a firmware update, re-check these settings. Updates have reset them before (Roku network access, Samsung pairing)."
+ ],
+ "devices": {
+  "sky_q": {
+   "title": "Sky Q and Sky Q Mini",
+   "c4": [
+    "Power: set standby to Active, not Eco. In Eco the box drops off the network overnight and stops answering IP control. Path: Home > Settings > Setup > Preferences > Power (path from the Remotes README, wording differs by firmware).",
+    "HDMI control (CEC): Home > Settings > Setup > Audio visual > HDMI control > Off, so the box can't switch the TV on or change inputs after its nightly reboot.",
+    "Turn HDMI-CEC off on the TV too. Sky forum Superusers note the TV's own CEC and 'auto switch to active HDMI' settings also cause wake-ups at night.",
+    "Give each box a DHCP reservation. IP control is TCP 49160 (keys) and HTTP 9006 (status).",
+    "Installer menu also has Network (Wi-Fi 2.4/5GHz, Powerline, Ethernet on/off), Reset (settings / factory) and Apps > Refresh apps. Turn off Wi-Fi/Powerline on wired rack boxes if you want them on Ethernet only.",
+    "Unverified, check on the model: Sky Q Mini uses the same installer route as the main box; no source covered the Mini specifically."
+   ],
+   "installer": {
+    "title": "Sky Q installer menu",
+    "steps": [
+     "Press Home.",
+     "Scroll down to Settings and highlight it. Do not press Select.",
+     "Press 0 0 1 straight away, then Select.",
+     "The installer menu opens (Network, Reset, Apps)."
+    ],
+    "codes": [
+     [
+      "home",
+      "Home, then highlight Settings"
+     ],
+     [
+      "0,0,1,select",
+      "0 0 1 Select (with Settings highlighted)"
+     ]
+    ]
+   },
+   "sources": [
+    "https://helpforum.sky.com/t5/Sky-TV/Sky-Q-hidden-menu/ba-p/4364881",
+    "https://heenan.me.uk/dusky-control/installer-menu.shtml",
+    "https://helpforum.sky.com/t5/Sky-Q/Sky-Q-Mini-HDMI-CEC/td-p/4475262",
+    "https://helpforum.sky.com/t5/Sky-Q/TV-turns-on-during-the-night/m-p/4861047"
+   ],
+   "tasks": [
+    {
+     "id": "sky_q.power-standby-active-not",
+     "text": "Power: set standby to Active, not Eco. In Eco the box drops off the network overnight and stops answering IP control. Path: Home > Settings > Setup > Preferences > Power (path from the Remotes README, wording differs by firmware).",
+     "verified": true
+    },
+    {
+     "id": "sky_q.hdmi-control-cec-home",
+     "text": "HDMI control (CEC): Home > Settings > Setup > Audio visual > HDMI control > Off, so the box can't switch the TV on or change inputs after its nightly reboot.",
+     "verified": true
+    },
+    {
+     "id": "sky_q.hdmi-cec-off-tv",
+     "text": "Turn HDMI-CEC off on the TV too. Sky forum Superusers note the TV's own CEC and 'auto switch to active HDMI' settings also cause wake-ups at night.",
+     "verified": true
+    },
+    {
+     "id": "sky_q.each-box-dhcp-reservation",
+     "text": "Give each box a DHCP reservation. IP control is TCP 49160 (keys) and HTTP 9006 (status).",
+     "verified": true
+    },
+    {
+     "id": "sky_q.installer-menu-also-has",
+     "text": "Installer menu also has Network (Wi-Fi 2.4/5GHz, Powerline, Ethernet on/off), Reset (settings / factory) and Apps > Refresh apps. Turn off Wi-Fi/Powerline on wired rack boxes if you want them on Ethernet only.",
+     "verified": true
+    },
+    {
+     "id": "sky_q.sky-q-mini-uses",
+     "text": "Sky Q Mini uses the same installer route as the main box; no source covered the Mini specifically.",
+     "verified": false
+    }
+   ]
+  },
+  "sky_hd": {
+   "title": "Sky+HD",
+   "c4": [
+    "Check the box is actually on the network (Services > Settings > Network). Most Sky+HD boxes were installed without a cable, and IP control (TCP 5900) needs one.",
+    "Give it a DHCP reservation. There is no status API, so Control4 can't read power state; use IR or a video/current sense if you need it.",
+    "Installer menu is mainly used for the RF outlet: turn RF outlet power on, set the channel (default CH68; some amplifiers only tune to CH60), press Green to save. It also holds LNB settings for single-feed installs.",
+    "Unverified, check on the model: Some guides give Select, 0 0 1, Select instead of Services first. Try that if Services doesn't work."
+   ],
+   "installer": {
+    "title": "Sky+HD installer menu",
+    "steps": [
+     "Press Services.",
+     "Press 0 0 1 then Select (newer guide). The digits don't show on screen; that's normal.",
+     "On the old guide the sequence is Services, 4, 0 1, Select.",
+     "For the RF outlet: open RF outlets, set RF outlet power supply to On, press Green to save."
+    ],
+    "codes": [
+     [
+      "search,0,0,1,select",
+      "Services 0 0 1 Select (current guide)"
+     ],
+     [
+      "search,4,0,1,select",
+      "Services 4 0 1 Select (old guide)"
+     ]
+    ]
+   },
+   "sources": [
+    "https://heenan.me.uk/dusky-control/installer-menu.shtml",
+    "https://antiference.co.uk/faq/activating-sky-hidden-menu/",
+    "https://www.smartaerials.co.uk/diy-guides/how-to-get-into-secret-installer-menu-on-sky-hd-boxes"
+   ],
+   "tasks": [
+    {
+     "id": "sky_hd.check-box-actually-network",
+     "text": "Check the box is actually on the network (Services > Settings > Network). Most Sky+HD boxes were installed without a cable, and IP control (TCP 5900) needs one.",
+     "verified": true
+    },
+    {
+     "id": "sky_hd.dhcp-reservation-there-no",
+     "text": "Give it a DHCP reservation. There is no status API, so Control4 can't read power state; use IR or a video/current sense if you need it.",
+     "verified": true
+    },
+    {
+     "id": "sky_hd.installer-menu-mainly-used",
+     "text": "Installer menu is mainly used for the RF outlet: turn RF outlet power on, set the channel (default CH68; some amplifiers only tune to CH60), press Green to save. It also holds LNB settings for single-feed installs.",
+     "verified": true
+    },
+    {
+     "id": "sky_hd.some-guides-select-0",
+     "text": "Some guides give Select, 0 0 1, Select instead of Services first. Try that if Services doesn't work.",
+     "verified": false
+    }
+   ]
+  },
+  "sky_stream": {
+   "title": "Sky Stream and Sky Glass",
+   "c4": [
+    "There is no installer menu on Stream or Glass (Sky forum Superuser answer; 0 0 1 Select only opens Retail mode).",
+    "To refresh apps: Settings > System > Apps & updates > Refresh apps.",
+    "IP control needs a third-party driver (Chowmain Sky driver) or IR into the puck's IR window. Give the puck a DHCP reservation.",
+    "Unverified, check on the model: turn HDMI-CEC off on the TV if the puck switches the TV on or changes inputs."
+   ],
+   "installer": null,
+   "sources": [
+    "https://helpforum.sky.com/t5/Sky-Stream/Sky-hidden-menu/td-p/4783847"
+   ],
+   "tasks": [
+    {
+     "id": "sky_stream.there-no-installer-menu",
+     "text": "There is no installer menu on Stream or Glass (Sky forum Superuser answer; 0 0 1 Select only opens Retail mode).",
+     "verified": true
+    },
+    {
+     "id": "sky_stream.refresh-apps-system-apps",
+     "text": "To refresh apps: Settings > System > Apps & updates > Refresh apps.",
+     "verified": true
+    },
+    {
+     "id": "sky_stream.ip-control-needs-third",
+     "text": "IP control needs a third-party driver (Chowmain Sky driver) or IR into the puck's IR window. Give the puck a DHCP reservation.",
+     "verified": true
+    },
+    {
+     "id": "sky_stream.hdmi-cec-off-tv",
+     "text": "turn HDMI-CEC off on the TV if the puck switches the TV on or changes inputs.",
+     "verified": false
+    }
+   ]
+  },
+  "lg": {
+   "title": "LG webOS TV",
+   "c4": [
+    "Use the IR remote (not the Magic/pointer remote) for the installer codes.",
+    "Turn off energy saving settings under All Settings, or the TV may not power on from cold.",
+    "TV on with mobile: Settings > General > Devices > External devices > TV on with mobile > Turn on via Wi-Fi > On. Snap One says this must be on even when wired.",
+    "IP Control Setup (see installer) > SDDP > On.",
+    "IP Control Setup > Wake-on-LAN > On.",
+    "IP Control Setup > Network IP Control > On.",
+    "IP Control Setup > Generate Keycode, and record the key in the network map. A new keycode invalidates the old one.",
+    "Once IP control is set, Wake-on-LAN is the only way to turn the TV on from standby, so wire it and note its MAC.",
+    "Static IP or DHCP reservation, wired.",
+    "Unverified, check on the model: turn SimpLink (HDMI-CEC) off: Settings > General > Devices > HDMI Settings > SimpLink (HDMI-CEC). Path varies by webOS version."
+   ],
+   "installer": {
+    "title": "LG IP Control Settings",
+    "steps": [
+     "2026 and later: Settings > Support > IP Control Settings.",
+     "Older: Settings > All Settings > General > Network. Highlight Network, don't press OK, then key 8 2 8 8 8 quickly. IP Control Setup appears after a few seconds.",
+     "If that fails, some models take 7 3 7 7 7 on the Network icon.",
+     "Fallback installer menu: go to a CATV input showing snow, hold Settings until the channel number shows, then 8 2 8 OK (or 1 1 0 5) and set IP control On."
+    ],
+    "codes": [
+     [
+      "8,2,8,8,8",
+      "8 2 8 8 8 on highlighted Network"
+     ],
+     [
+      "7,3,7,7,7",
+      "7 3 7 7 7 (alternative)"
+     ]
+    ]
+   },
+   "sources": [
+    "https://help.snapone.com/sb-solis-ig/Content/Topics/IP%20Control.htm",
+    "https://support.atlona.com/hc/en-us/articles/1260800989569-LG-IP-control-and-IP-Control-Installer-Menu"
+   ],
+   "tasks": [
+    {
+     "id": "lg.use-ir-remote-not",
+     "text": "Use the IR remote (not the Magic/pointer remote) for the installer codes.",
+     "verified": true
+    },
+    {
+     "id": "lg.off-energy-saving-under",
+     "text": "Turn off energy saving settings under All Settings, or the TV may not power on from cold.",
+     "verified": true
+    },
+    {
+     "id": "lg.tv-with-mobile-general",
+     "text": "TV on with mobile: Settings > General > Devices > External devices > TV on with mobile > Turn on via Wi-Fi > On. Snap One says this must be on even when wired.",
+     "verified": true
+    },
+    {
+     "id": "lg.ip-control-see-installer",
+     "text": "IP Control Setup (see installer) > SDDP > On.",
+     "verified": true
+    },
+    {
+     "id": "lg.ip-control-wake-lan",
+     "text": "IP Control Setup > Wake-on-LAN > On.",
+     "verified": true
+    },
+    {
+     "id": "lg.ip-control-network-ip",
+     "text": "IP Control Setup > Network IP Control > On.",
+     "verified": true
+    },
+    {
+     "id": "lg.ip-control-generate-keycode",
+     "text": "IP Control Setup > Generate Keycode, and record the key in the network map. A new keycode invalidates the old one.",
+     "verified": true
+    },
+    {
+     "id": "lg.once-ip-control-wake",
+     "text": "Once IP control is set, Wake-on-LAN is the only way to turn the TV on from standby, so wire it and note its MAC.",
+     "verified": true
+    },
+    {
+     "id": "lg.static-ip-dhcp-reservation",
+     "text": "Static IP or DHCP reservation, wired.",
+     "verified": true
+    },
+    {
+     "id": "lg.simplink-hdmi-cec-off",
+     "text": "turn SimpLink (HDMI-CEC) off: Settings > General > Devices > HDMI Settings > SimpLink (HDMI-CEC). Path varies by webOS version.",
+     "verified": false
+    }
+   ]
+  },
+  "samsung": {
+   "title": "Samsung Tizen TV",
+   "c4": [
+    "IP Remote: Settings > All Settings > Connection > Network > Expert Settings > IP Remote > Enable (2021 and older: Settings > General > Network > Expert Settings).",
+    "Power On with Mobile: same Expert Settings menu > Power On with Mobile > On.",
+    "Wire it so Wake-on-LAN works. After the TV has been off for over a minute its IP server is offline, so Control4 needs WoL; send both IP power-on and WoL.",
+    "Record the MAC: Settings > Support > About This TV > Wired MAC Address. Samsung calls a wrong MAC the most common cause of failed power-on.",
+    "Pairing: when Control4 first connects, a prompt appears on the TV. Press Allow with the TV remote (TV must be on).",
+    "Anynet+ (HDMI-CEC) Off: Samsung says control partners ask for this because CEC can disrupt communication and reliable control.",
+    "Eco settings: Samsung says these can affect timing and reliability. Turn off auto power off / eco timers.",
+    "Far-field voice models: keeping Bixby in standby (Settings > General > Voice > Voice Assistant > Bixby Wakeup Options) may keep the IP server open.",
+    "Static IP via DHCP reservation."
+   ],
+   "installer": {
+    "title": "Samsung HDMI Auto Detect toggle",
+    "steps": [
+     "Turn the TV on, set Source to TV.",
+     "IR remote: Mute, 7 2 9, Exit. Smart remote: Mute, Vol down, Ch down, Mute.",
+     "No message appears. Entering it again turns it back on. Disabling HDMI Auto Detect stops inputs switching on their own."
+    ],
+    "codes": []
+   },
+   "sources": [
+    "https://image-us.samsung.com/SamsungUS/samsungbusiness/tv-ci-resources/Samsung-IP-Control.pdf",
+    "https://support.ava.com/hc/en-us/articles/22550948779293-Samsung-TV-IP-Driver-does-not-Turn-On-the-TV"
+   ],
+   "tasks": [
+    {
+     "id": "samsung.ip-remote-connection-network",
+     "text": "IP Remote: Settings > All Settings > Connection > Network > Expert Settings > IP Remote > Enable (2021 and older: Settings > General > Network > Expert Settings).",
+     "verified": true
+    },
+    {
+     "id": "samsung.power-with-mobile-same",
+     "text": "Power On with Mobile: same Expert Settings menu > Power On with Mobile > On.",
+     "verified": true
+    },
+    {
+     "id": "samsung.wire-wake-lan-works",
+     "text": "Wire it so Wake-on-LAN works. After the TV has been off for over a minute its IP server is offline, so Control4 needs WoL; send both IP power-on and WoL.",
+     "verified": true
+    },
+    {
+     "id": "samsung.record-mac-support-about",
+     "text": "Record the MAC: Settings > Support > About This TV > Wired MAC Address. Samsung calls a wrong MAC the most common cause of failed power-on.",
+     "verified": true
+    },
+    {
+     "id": "samsung.pairing-when-control4-first",
+     "text": "Pairing: when Control4 first connects, a prompt appears on the TV. Press Allow with the TV remote (TV must be on).",
+     "verified": true
+    },
+    {
+     "id": "samsung.anynet-hdmi-cec-off",
+     "text": "Anynet+ (HDMI-CEC) Off: Samsung says control partners ask for this because CEC can disrupt communication and reliable control.",
+     "verified": true
+    },
+    {
+     "id": "samsung.eco-samsung-says-these",
+     "text": "Eco settings: Samsung says these can affect timing and reliability. Turn off auto power off / eco timers.",
+     "verified": true
+    },
+    {
+     "id": "samsung.far-field-voice-models",
+     "text": "Far-field voice models: keeping Bixby in standby (Settings > General > Voice > Voice Assistant > Bixby Wakeup Options) may keep the IP server open.",
+     "verified": true
+    },
+    {
+     "id": "samsung.static-ip-via-dhcp",
+     "text": "Static IP via DHCP reservation.",
+     "verified": true
+    }
+   ]
+  },
+  "sony": {
+   "title": "Sony Bravia TV",
+   "c4": [
+    "IP control authentication: Settings > Network & Internet > Home network > IP control > Authentication > Normal and Pre-Shared Key, then set the key and enter the same key in the Control4 driver.",
+    "Remote device control: Settings > Network & Internet > Remote device settings > Control remotely > On. This also enables Wake-on-LAN.",
+    "If the TV suspends, its web server stops and IP control won't answer until WoL powers it back. Wire it and note the MAC.",
+    "DHCP reservation, wired.",
+    "Unverified, check on the model: turn Bravia Sync (HDMI-CEC) off: Settings > Channels & Inputs > External inputs > BRAVIA Sync settings > BRAVIA Sync control. Path varies by year.",
+    "Unverified, check on the model: older (pre-Google TV) menus call it 'Remote start' (Settings > Network > Remote start > On) and 'Simple IP control'."
+   ],
+   "installer": null,
+   "sources": [
+    "https://pro-bravia.sony.net/remote-display-control/ircc-ip/",
+    "https://support.ava.com/hc/en-us/articles/18164898439709--IP-Driver-for-Sony-Bravia-TVs"
+   ],
+   "tasks": [
+    {
+     "id": "sony.ip-control-authentication-network",
+     "text": "IP control authentication: Settings > Network & Internet > Home network > IP control > Authentication > Normal and Pre-Shared Key, then set the key and enter the same key in the Control4 driver.",
+     "verified": true
+    },
+    {
+     "id": "sony.remote-device-control-network",
+     "text": "Remote device control: Settings > Network & Internet > Remote device settings > Control remotely > On. This also enables Wake-on-LAN.",
+     "verified": true
+    },
+    {
+     "id": "sony.tv-suspends-its-web",
+     "text": "If the TV suspends, its web server stops and IP control won't answer until WoL powers it back. Wire it and note the MAC.",
+     "verified": true
+    },
+    {
+     "id": "sony.dhcp-reservation-wired",
+     "text": "DHCP reservation, wired.",
+     "verified": true
+    },
+    {
+     "id": "sony.bravia-sync-hdmi-cec",
+     "text": "turn Bravia Sync (HDMI-CEC) off: Settings > Channels & Inputs > External inputs > BRAVIA Sync settings > BRAVIA Sync control. Path varies by year.",
+     "verified": false
+    },
+    {
+     "id": "sony.older-pre-google-tv",
+     "text": "older (pre-Google TV) menus call it 'Remote start' (Settings > Network > Remote start > On) and 'Simple IP control'.",
+     "verified": false
+    }
+   ]
+  },
+  "denon": {
+   "title": "Denon and Marantz AV receivers",
+   "c4": [
+    "Network standby: Setup > Network > Network Control (older models: IP Control) > Always On. Off In Standby stops IP control when the unit is in standby. Denon notes Always On uses more standby power.",
+    "Unverified, check on the model: Setup > Video > HDMI Setup > HDMI Control > Off, unless you're relying on ARC/eARC from the TV.",
+    "Unverified, check on the model: Setup > General > ECO > Auto Standby > Off, and ECO Mode Off (or On) rather than Auto so volume/power behaviour is predictable.",
+    "DHCP reservation, wired. Marantz uses the same menus and protocol."
+   ],
+   "installer": null,
+   "sources": [
+    "https://manuals.denon.com/avrx3800h/NA/EN/HJWMSYmehwmguq.php",
+    "https://manuals.denon.com/avrs700w/na/en/GFNFSYulicvuop.php"
+   ],
+   "tasks": [
+    {
+     "id": "denon.network-standby-network-network",
+     "text": "Network standby: Setup > Network > Network Control (older models: IP Control) > Always On. Off In Standby stops IP control when the unit is in standby. Denon notes Always On uses more standby power.",
+     "verified": true
+    },
+    {
+     "id": "denon.video-hdmi-hdmi-control",
+     "text": "Setup > Video > HDMI Setup > HDMI Control > Off, unless you're relying on ARC/eARC from the TV.",
+     "verified": false
+    },
+    {
+     "id": "denon.general-eco-auto-standby",
+     "text": "Setup > General > ECO > Auto Standby > Off, and ECO Mode Off (or On) rather than Auto so volume/power behaviour is predictable.",
+     "verified": false
+    },
+    {
+     "id": "denon.dhcp-reservation-wired-marantz",
+     "text": "DHCP reservation, wired. Marantz uses the same menus and protocol.",
+     "verified": true
+    }
+   ]
+  },
+  "yamaha": {
+   "title": "Yamaha AV receivers",
+   "c4": [
+    "Network Standby: Setup > Network > Network Standby > On. 'Auto' lets it go into a power-save state where it can't be turned on from the network.",
+    "Unverified, check on the model: Setup > HDMI > HDMI Control > Off.",
+    "Unverified, check on the model: Setup > ECO > Auto Power Standby > Off, ECO Mode Off.",
+    "DHCP reservation, wired. Yamaha MusicCast models also integrate with Control4 for MusicCast control."
+   ],
+   "installer": null,
+   "sources": [
+    "https://manual.yamaha.com/av/22/rn800a/en-US/8393359755.html",
+    "https://usa.yamaha.com/news_events/2016/20160915_yamaha_to_expand_integration_with_control4_and_rti_us.html"
+   ],
+   "tasks": [
+    {
+     "id": "yamaha.network-standby-network-network",
+     "text": "Network Standby: Setup > Network > Network Standby > On. 'Auto' lets it go into a power-save state where it can't be turned on from the network.",
+     "verified": true
+    },
+    {
+     "id": "yamaha.hdmi-hdmi-control-off",
+     "text": "Setup > HDMI > HDMI Control > Off.",
+     "verified": false
+    },
+    {
+     "id": "yamaha.eco-auto-power-standby",
+     "text": "Setup > ECO > Auto Power Standby > Off, ECO Mode Off.",
+     "verified": false
+    },
+    {
+     "id": "yamaha.dhcp-reservation-wired-yamaha",
+     "text": "DHCP reservation, wired. Yamaha MusicCast models also integrate with Control4 for MusicCast control.",
+     "verified": true
+    }
+   ]
+  },
+  "onkyo": {
+   "title": "Onkyo, Pioneer and Integra AV receivers",
+   "c4": [
+    "Setup > Hardware > Network Standby > On (needed to power on over IP).",
+    "Setup > Hardware > HDMI CEC > Off. Onkyo's own note says set it Off if you see abnormal behaviour.",
+    "Setup > Hardware > Auto Standby > Off (otherwise it sleeps after 20 minutes with no input).",
+    "HDMI Standby Through: leave on Auto or Off to taste; with CEC Off you can choose Off.",
+    "DHCP reservation, wired. Menu names are from the TX-NR7100; other models may differ."
+   ],
+   "installer": null,
+   "sources": [
+    "https://support.onkyousa.com/hc/en-us/articles/10371866035220-TX-NR7100-Setup-Menu-Hardware"
+   ],
+   "tasks": [
+    {
+     "id": "onkyo.hardware-network-standby-needed",
+     "text": "Setup > Hardware > Network Standby > On (needed to power on over IP).",
+     "verified": true
+    },
+    {
+     "id": "onkyo.hardware-hdmi-cec-off",
+     "text": "Setup > Hardware > HDMI CEC > Off. Onkyo's own note says set it Off if you see abnormal behaviour.",
+     "verified": true
+    },
+    {
+     "id": "onkyo.hardware-auto-standby-off",
+     "text": "Setup > Hardware > Auto Standby > Off (otherwise it sleeps after 20 minutes with no input).",
+     "verified": true
+    },
+    {
+     "id": "onkyo.hdmi-standby-through-leave",
+     "text": "HDMI Standby Through: leave on Auto or Off to taste; with CEC Off you can choose Off.",
+     "verified": true
+    },
+    {
+     "id": "onkyo.dhcp-reservation-wired-menu",
+     "text": "DHCP reservation, wired. Menu names are from the TX-NR7100; other models may differ.",
+     "verified": true
+    }
+   ]
+  },
+  "roku": {
+   "title": "Roku",
+   "c4": [
+    "Network access: Settings > System > Advanced system settings > Control by mobile apps (External control) > Network access > Default or Enabled (not Limited or Disabled). Control4 stops working when this is Limited.",
+    "Roku firmware updates have reset this to Limited (14.6.4, July 2025). Re-check after updates.",
+    "If control still fails, unplug the Roku for 2 to 3 minutes.",
+    "DHCP reservation. Control by app needs the controller on the same network.",
+    "Unverified, check on the model: Settings > System > Power > Fast TV start On (Roku TVs) so it wakes over the network; turn HDMI-CEC (Settings > System > Control other devices) off."
+   ],
+   "installer": null,
+   "sources": [
+    "https://support.roku.com/en-gb/article/can-my-roku-streaming-device-be-controlled-using-an-app",
+    "https://support-thlproducts.freshdesk.com/support/solutions/articles/73000654068-control4-does-not-control-roku",
+    "https://community.roku.com/discussions/tv-and-players/control4-remote-not-working-with-14-6-4-update/1083904"
+   ],
+   "tasks": [
+    {
+     "id": "roku.network-access-system-advanced",
+     "text": "Network access: Settings > System > Advanced system settings > Control by mobile apps (External control) > Network access > Default or Enabled (not Limited or Disabled). Control4 stops working when this is Limited.",
+     "verified": true
+    },
+    {
+     "id": "roku.roku-firmware-updates-have",
+     "text": "Roku firmware updates have reset this to Limited (14.6.4, July 2025). Re-check after updates.",
+     "verified": true
+    },
+    {
+     "id": "roku.control-still-fails-unplug",
+     "text": "If control still fails, unplug the Roku for 2 to 3 minutes.",
+     "verified": true
+    },
+    {
+     "id": "roku.dhcp-reservation-control-by",
+     "text": "DHCP reservation. Control by app needs the controller on the same network.",
+     "verified": true
+    },
+    {
+     "id": "roku.system-power-fast-tv",
+     "text": "Settings > System > Power > Fast TV start On (Roku TVs) so it wakes over the network; turn HDMI-CEC (Settings > System > Control other devices) off.",
+     "verified": false
+    }
+   ]
+  },
+  "sonos": {
+   "title": "Sonos",
+   "c4": [
+    "Give every player a DHCP reservation. Sonos uses SDDP with Control4, so the driver follows IP changes, but reservations still avoid trouble.",
+    "Control4 forum experience: almost all Sonos/Control4 issues come from network design (multicast, STP, mesh/Wi-Fi). Wire players or a single SonosNet root where you can.",
+    "Arc/Beam/Ray on TV: they use HDMI-CEC/eARC for TV audio, so keep CEC on for that TV input only if the Sonos is the TV's sound."
+   ],
+   "installer": null,
+   "sources": [
+    "https://www.c4forums.com/topic/31934-new-sonos-integration/",
+    "https://support.sonos.com/en-gb/article/hdmi-error-in-the-sonos-app"
+   ],
+   "tasks": [
+    {
+     "id": "sonos.player-dhcp-reservation-sonos",
+     "text": "Give every player a DHCP reservation. Sonos uses SDDP with Control4, so the driver follows IP changes, but reservations still avoid trouble.",
+     "verified": true
+    },
+    {
+     "id": "sonos.control4-forum-experience-almost",
+     "text": "Control4 forum experience: almost all Sonos/Control4 issues come from network design (multicast, STP, mesh/Wi-Fi). Wire players or a single SonosNet root where you can.",
+     "verified": true
+    },
+    {
+     "id": "sonos.arc-beam-ray-tv",
+     "text": "Arc/Beam/Ray on TV: they use HDMI-CEC/eARC for TV audio, so keep CEC on for that TV input only if the Sonos is the TV's sound.",
+     "verified": true
+    }
+   ]
+  },
+  "pjlink": {
+   "title": "PJLink projectors (Epson, Panasonic, NEC and others)",
+   "c4": [
+    "Epson: Network > Projector Control > PJLink > On.",
+    "Epson: Network > Projector Control > PJLink Password: set one (up to 32 alphanumeric, @ allowed) and enter it in the Control4 driver.",
+    "Epson: Network > Projector Control > Control4 SDDP > On.",
+    "Epson: Extended > Standby Mode > Communication On, so it answers over the network in standby. Some models need A/V Output set to While Projecting and Auto Power On Off first.",
+    "NEC: projectors can cut LAN power after 3 minutes without traffic (EuP). Set standby so the LAN stays alive. On some models use the Expert menu: Setup > Expert > Standby mode setting > Disable.",
+    "Unverified, check on the model: Panasonic: Setup > Standby mode > Normal (not Eco), Network > PJLink on.",
+    "DHCP reservation or static IP. PJLink is TCP 4352."
+   ],
+   "installer": {
+    "title": "NEC Expert menu",
+    "steps": [
+     "On the NEC remote press Help, Up, Left, Help.",
+     "Press Menu. EXPERT shows in the bottom right corner.",
+     "Setup > Expert (or Expert2) > Standby mode setting > Disable."
+    ],
+    "codes": []
+   },
+   "sources": [
+    "https://files.support.epson.com/docid/cpd6/cpd61108/source/network/reference/network_projector_control.html",
+    "https://files.support.epson.com/docid/cpd6/cpd64101/source/menus/reference/ebpq2008b_2220b/extended_standby_mode_ebpq2008b_2220b.html",
+    "https://support.biamp.com/Biamp_Control/Control_configuration/NEC_projectors_and_LAN_control"
+   ],
+   "tasks": [
+    {
+     "id": "pjlink.network-projector-control-pjlink",
+     "text": "Epson: Network > Projector Control > PJLink > On.",
+     "verified": true
+    },
+    {
+     "id": "pjlink.network-projector-control-pjlink-2",
+     "text": "Epson: Network > Projector Control > PJLink Password: set one (up to 32 alphanumeric, @ allowed) and enter it in the Control4 driver.",
+     "verified": true
+    },
+    {
+     "id": "pjlink.network-projector-control-control4",
+     "text": "Epson: Network > Projector Control > Control4 SDDP > On.",
+     "verified": true
+    },
+    {
+     "id": "pjlink.extended-standby-mode-communication",
+     "text": "Epson: Extended > Standby Mode > Communication On, so it answers over the network in standby. Some models need A/V Output set to While Projecting and Auto Power On Off first.",
+     "verified": true
+    },
+    {
+     "id": "pjlink.projectors-can-cut-lan",
+     "text": "NEC: projectors can cut LAN power after 3 minutes without traffic (EuP). Set standby so the LAN stays alive. On some models use the Expert menu: Setup > Expert > Standby mode setting > Disable.",
+     "verified": true
+    },
+    {
+     "id": "pjlink.standby-mode-normal-not",
+     "text": "Panasonic: Setup > Standby mode > Normal (not Eco), Network > PJLink on.",
+     "verified": false
+    },
+    {
+     "id": "pjlink.dhcp-reservation-static-ip",
+     "text": "DHCP reservation or static IP. PJLink is TCP 4352.",
+     "verified": true
+    }
+   ]
+  },
+  "jvc": {
+   "title": "JVC D-ILA projectors",
+   "c4": [
+    "Function > ECO Mode > Off. With it On, JVC says RS-232C and LAN control can't be used in standby.",
+    "Function > Network: set DHCP Client Off and enter a static IP (or keep DHCP with a reservation), then Set.",
+    "Function > Control4 SDDP > On.",
+    "Function > Network Password: 8 to 10 characters. Any third-party IP control system (Control4) must be given this password.",
+    "Unverified, check on the model: IP control port is TCP 20554 (JVC 'PJ_OK / PJREQ / PJACK' handshake)."
+   ],
+   "installer": null,
+   "sources": [
+    "https://manual3.jvckenwood.com/projector/mobile/dla/b5a-4578-01/GOUMSYcdmflbhj.php",
+    "https://manual3.jvckenwood.com/projector/mobile/dla/b5a-4578-01/GOUMSYcfkgniil.php"
+   ],
+   "tasks": [
+    {
+     "id": "jvc.function-eco-mode-off",
+     "text": "Function > ECO Mode > Off. With it On, JVC says RS-232C and LAN control can't be used in standby.",
+     "verified": true
+    },
+    {
+     "id": "jvc.function-network-dhcp-client",
+     "text": "Function > Network: set DHCP Client Off and enter a static IP (or keep DHCP with a reservation), then Set.",
+     "verified": true
+    },
+    {
+     "id": "jvc.function-control4-sddp",
+     "text": "Function > Control4 SDDP > On.",
+     "verified": true
+    },
+    {
+     "id": "jvc.function-network-password-8",
+     "text": "Function > Network Password: 8 to 10 characters. Any third-party IP control system (Control4) must be given this password.",
+     "verified": true
+    },
+    {
+     "id": "jvc.ip-control-port-tcp",
+     "text": "IP control port is TCP 20554 (JVC 'PJ_OK / PJREQ / PJACK' handshake).",
+     "verified": false
+    }
+   ]
+  },
+  "appletv": {
+   "title": "Apple TV",
+   "c4": [
+    "Control4 guide: Settings > General > Sleep After > Never.",
+    "Control4 guide: Settings > AirPlay > On.",
+    "Control4 guide: Settings > AirPlay > Room: set the right room.",
+    "Control4 guide: set up with the customer's Apple ID using 'Set Up with Device', on tvOS 12.1 or later.",
+    "Control4 guide: after choosing the Apple TV in the driver, restart it (Settings > System > Restart) and check the driver shows 'Remote Activated'.",
+    "Settings > Remotes and Devices > Control TVs and Receivers > Off, so the Apple TV doesn't turn the TV on or switch inputs over CEC.",
+    "'Cinema mode' most likely means Match Content: Settings > Video and Audio > Match Content > Match Dynamic Range and Match Frame Rate. With these on the TV blanks for a moment when content starts, which looks like a fault on a matrix/Control4 system. Turn them off if that's a problem.",
+    "Other candidates: Settings > Video and Audio > Reduce Loud Sounds (night mode) Off, and the TV's own picture mode (Cinema/Filmmaker), which is a TV setting, not Apple TV.",
+    "Wire it (Ethernet) and give it a DHCP reservation."
+   ],
+   "installer": null,
+   "sources": [
+    "https://docs.control4.com/docs/product/apple-tv-driver/dealer-quick-start-guide/english/latest/apple-tv-driver-quick-start-guide-rev-c.pdf",
+    "https://support.apple.com/en-sa/102277",
+    "https://c4forums.com/forums/topic/28353-apple-tv-4th-gen-wake-up-tv-and-unable-to-turn-off"
+   ],
+   "tasks": [
+    {
+     "id": "appletv.general-sleep-after-never",
+     "text": "Control4 guide: Settings > General > Sleep After > Never.",
+     "verified": true
+    },
+    {
+     "id": "appletv.airplay",
+     "text": "Control4 guide: Settings > AirPlay > On.",
+     "verified": true
+    },
+    {
+     "id": "appletv.airplay-room-right-room",
+     "text": "Control4 guide: Settings > AirPlay > Room: set the right room.",
+     "verified": true
+    },
+    {
+     "id": "appletv.up-with-customer-s",
+     "text": "Control4 guide: set up with the customer's Apple ID using 'Set Up with Device', on tvOS 12.1 or later.",
+     "verified": true
+    },
+    {
+     "id": "appletv.after-choosing-apple-tv",
+     "text": "Control4 guide: after choosing the Apple TV in the driver, restart it (Settings > System > Restart) and check the driver shows 'Remote Activated'.",
+     "verified": true
+    },
+    {
+     "id": "appletv.remotes-devices-control-tvs",
+     "text": "Settings > Remotes and Devices > Control TVs and Receivers > Off, so the Apple TV doesn't turn the TV on or switch inputs over CEC.",
+     "verified": true
+    },
+    {
+     "id": "appletv.cinema-mode-most-likely",
+     "text": "'Cinema mode' most likely means Match Content: Settings > Video and Audio > Match Content > Match Dynamic Range and Match Frame Rate. With these on the TV blanks for a moment when content starts, which looks like a fault on a matrix/Control4 system. Turn them off if that's a problem.",
+     "verified": true
+    },
+    {
+     "id": "appletv.other-candidates-video-audio",
+     "text": "Other candidates: Settings > Video and Audio > Reduce Loud Sounds (night mode) Off, and the TV's own picture mode (Cinema/Filmmaker), which is a TV setting, not Apple TV.",
+     "verified": true
+    },
+    {
+     "id": "appletv.wire-ethernet-dhcp-reservation",
+     "text": "Wire it (Ethernet) and give it a DHCP reservation.",
+     "verified": true
+    }
+   ]
+  }
+ },
+ "all_tasks": [
+  {
+   "id": "all.controlled-device-dhcp-reservation",
+   "text": "Give every controlled device a DHCP reservation (or static IP outside the pool) before adding it in Composer.",
+   "verified": true
+  },
+  {
+   "id": "all.wire-has-an-ethernet",
+   "text": "Wire it if it has an Ethernet port. Several TVs only wake over LAN (Wake-on-LAN) when wired.",
+   "verified": true
+  },
+  {
+   "id": "all.hdmi-cec-off-tvs",
+   "text": "Turn HDMI-CEC off on TVs, AVRs and sources unless the driver needs it. CEC fights the control system (inputs and power changing on their own).",
+   "verified": true
+  },
+  {
+   "id": "all.network-ip-standby-always",
+   "text": "Set network/IP standby to the 'always on' option so the device can be turned on over IP. It uses a little more standby power.",
+   "verified": true
+  },
+  {
+   "id": "all.off-eco-auto-power",
+   "text": "Turn off eco / auto power off / auto standby timers so devices don't sleep or drop off the network behind Control4's back.",
+   "verified": true
+  },
+  {
+   "id": "all.control4-sddp-where-device",
+   "text": "Turn on Control4 SDDP where the device offers it (Epson, JVC, LG, Sonos) so the driver follows IP changes.",
+   "verified": true
+  },
+  {
+   "id": "all.note-mac-address-any",
+   "text": "Note the MAC address and any pairing key or password in the site network map, never in the driver notes.",
+   "verified": true
+  },
+  {
+   "id": "all.after-firmware-update-re",
+   "text": "After a firmware update, re-check these settings. Updates have reset them before (Roku network access, Samsung pairing).",
+   "verified": true
+  }
+ ],
+ "task_note": "Each tasks[] item is one action with a stable id (device-key.slug). Ids never change once published; new items get new ids, removed items are dropped. Link a task to a device by site + device IP/MAC + id. verified=false means forum or general knowledge, check on the model."
+}
