@@ -1,3 +1,5 @@
+> **Moved (2026-11-24):** the tablet app is now built from `sonor-android-apps/remotes/` (signed APK by GitHub Actions). This folder is the old copy; change the page in `public/`, then re-copy it to `APP - Android Apps/remotes/web`.
+
 # Remotes phone app (Android)
 
 > Renamed from Sky Remote in v2.1.0. The Android id stays `uk.co.sonor.skyremote` so installed copies upgrade in place.
