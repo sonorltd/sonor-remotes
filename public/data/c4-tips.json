@@ -77,6 +77,140 @@
      "text": "Sky Q Mini uses the same installer route as the main box; no source covered the Mini specifically.",
      "verified": false
     }
+   ],
+   "issues": [
+    {
+     "id": "sky_q.issue.sky-q-shows-offline-firmware",
+     "title": "Sky Q shows offline after firmware moved the IP control port to 49160",
+     "symptom": "Sky Q IP driver shows the box offline and commands do nothing, even though the box's IP address is correct.",
+     "fix": "Use a maintained driver (Chowmain Sky driver), or set the driver port to 49160. Older free drivers used 5900.",
+     "detail": "Firmware Q060.000.28.00L (Dec 2017) moved remote control from 5900 to 49160; Chowmain fixed it on 2 Dec 2017. Status/JSON API is 9006. Intrinsic's drivers use an unofficial API Sky hasn't published.",
+     "evidence": "vendor",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/32101-sky-q-ip-driver/",
+      "https://drivercentral.io/platforms/control4-drivers/skyhd-skyq-uk-control4-driver-chowmain",
+      "https://github.com/RogerSelwyn/skyq_remote",
+      "https://www.intrinsicdev.com/?p=9423"
+     ]
+    },
+    {
+     "id": "sky_q.issue.eco-standby-makes-boxes-unreachable",
+     "title": "Eco standby makes boxes unreachable about 02:45 to 05:45",
+     "symptom": "Sky Q main and multiroom boxes show 'not connected' or ignore control in the early hours, then work again from about 06:00.",
+     "fix": "Home > Settings > Setup > Preferences: set Standby mode to Active (or None) instead of Eco.",
+     "detail": "Sky forum accepted answer: Eco runs low power 2:45am to 5:45am. Moving Eco to Active did not stop an overnight TV wake for one poster (that is CEC, see next).",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Q/Sky-Q-won-t-work-at-4am/m-p/4382640",
+      "https://helpforum.sky.com/t5/Sky-Q/SkyQ-box-turns-itself-and-TV-on-randomly-in-the-early-hours-of-the-morning/m-p/4458766",
+      "https://community.meraki.com/t5/Wireless/Meraki-and-SkyQ-AND-Minibox/m-p/80639"
+     ]
+    },
+    {
+     "id": "sky_q.issue.overnight-reboot-wakes-tv-av",
+     "title": "Overnight reboot wakes the TV or AV receiver through HDMI-CEC",
+     "symptom": "TV or AVR turns on between about 1am and 4am, or every morning after the Sky Q overnight reset.",
+     "fix": "On the Sky Q: Home > Settings > Setup > Audio visual > HDMI control > Off, and turn CEC off on the TV and AVR too.",
+     "detail": "Mixed results: fixed it for some, not others. The TV's 'auto switch to active HDMI' can be the trigger. With an Onkyo TX-NR676E, HDMI control off caused input flipping; that poster set AVR auto-standby to 30 min instead.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Q/SkyQ-box-turns-itself-and-TV-on-randomly-in-the-early-hours-of-the-morning/m-p/4458766",
+      "https://helpforum.sky.com/t5/Sky-Q/TV-turns-on-during-the-night/m-p/4861047",
+      "https://helpforum.sky.com/t5/Sky-Q/New-Sky-Q-Box-Switches-on-AV-Receiver-every-night/m-p/4377799"
+     ]
+    },
+    {
+     "id": "sky_q.issue.wired-sky-q-multiroom-creates",
+     "title": "Wired Sky Q multiroom creates switching loops or STP blocking",
+     "symptom": "With the main box and Minis all on Ethernet, the LAN slows badly (550 to 24 Mbps in one report), switch ports flap or block (UniFi), Minis drop out.",
+     "fix": "Turn off both Wi-Fi bands on every wired box in the installer menu (Home, highlight Settings, 0 0 1 Select > Network) after a wired network reset.",
+     "detail": "The boxes' AirTies mesh bridges Wi-Fi and Ethernet at the same time. One poster's only working setup was Q and Minis on their own switch with a single uplink to the router. Sky says managed switches can cause problems.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Q/Sky-Q-miniboxes-creating-a-loop-on-my-network/m-p/4442254",
+      "https://helpforum.sky.com/t5/Sky-Q/Main-SkyQ-causes-network-loop-on-switch-and-disconnects-from-network-STP-loop-dection/m-p/4637639"
+     ]
+    },
+    {
+     "id": "sky_q.issue.q-minis-drop-out-managed",
+     "title": "Q Minis drop out on managed networks (IGMP snooping, WIPS)",
+     "symptom": "Q Minis lose the main box, often overnight, on Meraki or other managed networks; ports flap and APs report disassociation.",
+     "fix": "Hardwire the boxes. If it continues, disable IGMP snooping on the switches carrying Sky Q, and whitelist the Sky mesh in wireless intrusion prevention.",
+     "detail": "IGMP snooping fix is from a single poster. Another found the main box's DHCP blocked until whitelisted.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://community.meraki.com/t5/Wireless/Meraki-and-SkyQ-AND-Minibox/m-p/80639"
+     ]
+    },
+    {
+     "id": "sky_q.issue.separate-vlan-sky-q-doesn",
+     "title": "A separate VLAN for Sky Q doesn't reliably help",
+     "symptom": "Wired Minis still lose the main box for minutes at a time on a managed L3 network; on another job a dedicated VLAN gave 'no internet' on the Q home screen.",
+     "fix": "Keep the Sky Q main box and Minis on simple unmanaged switching to the router rather than a VLAN over managed switches, with Wi-Fi off on all boxes.",
+     "detail": "Secondhand report that Sky support says VLANs aren't supported on older Q boxes. No confirmed fix in either thread.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Q/SkyQ-Mini-Boxes-lose-connection-even-when-wired/m-p/5219667",
+      "https://helpforum.sky.com/t5/Sky-Q/Main-SkyQ-causes-network-loop-on-switch-and-disconnects-from-network-STP-loop-dection/m-p/4637639"
+     ]
+    },
+    {
+     "id": "sky_q.issue.minis-lose-connection-firmware-update",
+     "title": "Minis lose connection after a firmware update",
+     "symptom": "After a firmware update Minis lose connection over Wi-Fi and Ethernet; one main box froze with high fan speed.",
+     "fix": "Reboot the main box then the Minis, network-reset and re-pair each Mini, and move the site's 5 GHz APs off channels 36 to 48 (the Q mesh default).",
+     "detail": "Channel 36-48 explanation is one poster's suggestion, not confirmed.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Q/Sky-mini-boxes-all-broken-after-update/m-p/4753099"
+     ]
+    },
+    {
+     "id": "sky_q.issue.ir-fallback-works-alongside-bluetooth",
+     "title": "IR fallback works alongside the Bluetooth remote",
+     "symptom": "Worry that Control4 IR will conflict with the client's Bluetooth Sky Q remote, or Sky+HD IR codes tried on a Q box.",
+     "fix": "Use a Sky Q-specific IR code set; the box takes IR and Bluetooth at once, so the client's remote stays paired.",
+     "detail": "Sky Q and Q Mini share IR codes; Sky+HD codes don't work on Q. On a Sky Q remote: 4+6 = IR mode, 1+3 = re-pair Bluetooth, 7+9 = reset.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Q/Sky-Q-Infrared-remote-control/m-p/4733507",
+      "https://automatednow.com/control4-driver-sky-uk/"
+     ]
+    },
+    {
+     "id": "sky_q.issue.chowmain-sky-driver-guide-pause",
+     "title": "Chowmain Sky driver: Guide and Pause mapping",
+     "symptom": "Guide does nothing on Sky Q, or Pause behaves wrongly, with the Chowmain driver.",
+     "fix": "Map Guide to HOME (not TVGUIDE) on Sky Q, and set the driver's Pause property to 'Play/Pause' for Sky Q.",
+     "detail": "Supports Sky+HD, Q, Q Silver, Q Mini. Needs OS 2.6+ and the driverCentral licensing driver. 24 Aug 2022 update fixed timer leaks on OS 2.10.x, so update old installs.",
+     "evidence": "vendor",
+     "sources": [
+      "https://drivercentral.io/platforms/control4-drivers/skyhd-skyq-uk-control4-driver-chowmain"
+     ]
+    },
+    {
+     "id": "sky_q.issue.box-lockups-program-driver-s",
+     "title": "Box lockups: program on the driver's offline event",
+     "symptom": "Sky boxes occasionally lock up and need a power cycle, causing service calls.",
+     "fix": "Program against the Chowmain driver's Connection Status offline event, with a switchable power outlet to power-cycle the box.",
+     "detail": "Driver retries every minute and fires offline after 5 failures. Developer suggested remote monitoring (Domotz) plus a smart plug.",
+     "evidence": "vendor",
+     "sources": [
+      "https://drivercentral.io/platforms/control4-drivers/skyhd-skyq-uk-control4-driver-chowmain",
+      "https://www.c4forums.com/topic/23569-chowmain-skyhd-skyq-sky-q-mini-for-control4/"
+     ]
+    },
+    {
+     "id": "sky_q.issue.matrix-video-duplicate-events-no",
+     "title": "Matrix video: duplicate events and no sync on power-on",
+     "symptom": "Sky commands fire more than once in distributed video; no picture after power-on through a matrix.",
+     "fix": "Update the Chowmain driver (29 Mar 2020 or later) and set its power-on delay so the HDMI chain can sync.",
+     "detail": "Changelog also fixed Sky+HD extra commands in matrixed systems (Mar 2017) and STOP not sent from remotes on poor Wi-Fi/Zigbee (Jan 2021).",
+     "evidence": "vendor",
+     "sources": [
+      "https://drivercentral.io/platforms/control4-drivers/skyhd-skyq-uk-control4-driver-chowmain"
+     ]
+    }
    ]
   },
   "sky_hd": {
@@ -132,6 +266,31 @@
      "text": "Some guides give Select, 0 0 1, Select instead of Services first. Try that if Services doesn't work.",
      "verified": false
     }
+   ],
+   "issues": [
+    {
+     "id": "sky_hd.issue.sky-hd-power-cycles-when",
+     "title": "Sky+HD power-cycles when selected from another room (Pulse-Eight driver)",
+     "symptom": "With the Pulse-Eight Sky HD IP driver, the box powers off and on when users switch to it from different rooms.",
+     "fix": "In Composer set the Pulse-Eight Sky HD IP driver property 'Allow Power Off' to Off.",
+     "detail": "Pulse-Eight knowledge base article.",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.pulse-eight.com/support/solutions/articles/30000044180-control-4-pulse-eight-sky-hd-ip-driver-powering-off"
+     ]
+    },
+    {
+     "id": "sky_hd.issue.pause-starts-playback-driver-update",
+     "title": "Pause starts playback after a driver update",
+     "symptom": "Pressing Pause on a Control4 remote starts playback on Sky+HD.",
+     "fix": "In the Chowmain driver set the Pause property to 'Pause' (Sky+HD), not 'Play/Pause'.",
+     "detail": "Default reverted to Pause in Aug 2020.",
+     "evidence": "vendor",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/23569-chowmain-skyhd-skyq-sky-q-mini-for-control4/page/8/",
+      "https://drivercentral.io/platforms/control4-drivers/skyhd-skyq-uk-control4-driver-chowmain"
+     ]
+    }
    ]
   },
   "sky_stream": {
@@ -166,6 +325,56 @@
      "id": "sky_stream.hdmi-cec-off-tv",
      "text": "turn HDMI-CEC off on the TV if the puck switches the TV on or changes inputs.",
      "verified": false
+    }
+   ],
+   "issues": [
+    {
+     "id": "sky_stream.issue.stream-glass-were-ir-only",
+     "title": "Stream and Glass were IR only (no open API)",
+     "symptom": "No Control4 IP driver for the puck or Glass; CEC attempts failed.",
+     "fix": "Control the puck by IR with an emitter on its IR window (community IR driver on c4forums or a learned code set), unless using the newer Chowmain IP driver.",
+     "detail": "2023: Chowmain said the puck had no open ports or API. Wake-on-LAN packets repeatedly crashed one user's pucks. Ping-based power detection is unreliable.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/42104-sky-stream-control4-drivers/",
+      "https://helpforum.sky.com/t5/Sky-Stream/How-to-determine-if-Sky-Stream-puk-is-on-off-for-home-automation/m-p/4686411",
+      "https://www.home-assistant.io/integrations/sky_remote/"
+     ]
+    },
+    {
+     "id": "sky_stream.issue.chowmain-sky-stream-ip-driver",
+     "title": "Chowmain Sky Stream IP driver (July 2026): keep IR for power-on on older pucks",
+     "symptom": "With IP control, some earlier pucks don't wake reliably over the network.",
+     "fix": "Update the Chowmain Sky driver and use IP control, but keep an IR emitter for power-on on older pucks.",
+     "detail": "From a trade-news podcast summary (8 Jul 2026), not Chowmain's own notes. Check driverCentral before quoting it.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.buzzsprout.com/2623540/episodes/19462395-chowmainsoft-launches-a-sky-stream-ip-driver-for-faster-network-control"
+     ]
+    },
+    {
+     "id": "sky_stream.issue.puck-wakes-from-deep-sleep",
+     "title": "Puck wakes from deep sleep only by IR line of sight",
+     "symptom": "A puck in a cupboard won't power on unless the remote points at it; once awake the Bluetooth remote works out of sight.",
+     "fix": "Fit an IR emitter on the puck's IR window for the wake command.",
+     "detail": "Also turn Network standby on and overnight power saving off in Start Up and Standby settings; deep sleep still happened for one user with those set.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Stream/Puck-in-cupboard-wont-turn-after-deep-sleep/m-p/5067062",
+      "https://helpforum.sky.com/t5/Sky-Stream/Power-on-Stream-with-puck-out-of-sight/m-p/4349146"
+     ]
+    },
+    {
+     "id": "sky_stream.issue.power-toggle-so-ir-macros",
+     "title": "Power is a toggle, so IR macros drift out of sync",
+     "symptom": "A power-on sent while the puck is slow to start turns it back off.",
+     "fix": "Use HOME as the 'on' command in the IR driver and keep Power (toggle) only for standby.",
+     "detail": "Home didn't wake every user's puck.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://helpforum.sky.com/t5/Sky-Stream/Power-on-Stream-with-puck-out-of-sight/m-p/4349146",
+      "https://helpforum.sky.com/t5/Sky-Stream/Sky-Stream-puck-more-info-on-the-remote-IR-functions/m-p/4730116"
+     ]
     }
    ]
   },
@@ -255,7 +464,135 @@
     {
      "id": "lg.simplink-hdmi-cec-off",
      "text": "turn SimpLink (HDMI-CEC) off: Settings > General > Devices > HDMI Settings > SimpLink (HDMI-CEC). Path varies by webOS version.",
-     "verified": false
+     "verified": true
+    }
+   ],
+   "issues": [
+    {
+     "id": "lg.issue.ip-control-not-enabled-installer",
+     "title": "IP control not enabled in the installer menu",
+     "symptom": "Driver never connects; 'Connected to Network' stays false and Get MAC fails.",
+     "fix": "With the IR remote, open IP Control Setup (8 2 8 8 8 on highlighted Network), set Network IP Control and SDDP On, generate the keycode and put it in the driver's Password property.",
+     "detail": "If the pointer moves while typing, the code fails. 2021 sets may need 7 3 7 7 7 or the CATV snow method; some 2021 OLEDs couldn't reach it at all. Keycode can be read only once.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/28461-lg-oled77c8pua-ip/",
+      "https://support.atlona.com/hc/en-us/articles/1260800989569-LG-IP-control-and-IP-Control-Installer-Menu",
+      "https://drivercentral.io/platforms/control4-drivers/audio-video/lg-webos-tv/"
+     ]
+    },
+    {
+     "id": "lg.issue.won-t-turn-over-ip",
+     "title": "Won't turn on over IP: Mobile TV On off",
+     "symptom": "TV turns off from Control4 but won't turn back on.",
+     "fix": "Settings > General > Mobile TV On > Turn on via Wi-Fi > On (needed even when wired).",
+     "detail": "Driver docs also ask for Wake on LAN, Always Ready and a DHCP reservation.",
+     "evidence": "vendor",
+     "sources": [
+      "https://drivercentral.io/platforms/control4-drivers/audio-video/lg-webos-tv/",
+      "https://www.c4forums.com/forums/topic/21853-lg-tv-ip-driver-released/"
+     ]
+    },
+    {
+     "id": "lg.issue.quick-start-off-30-s",
+     "title": "Quick Start+ off: 30 s dead period after power-on",
+     "symptom": "TV powers on but ignores the input command for ~30 s (2022 G2).",
+     "fix": "Turn Quick Start+ On (webOS 23+: General > System > Additional Settings; webOS 22: General > Devices > TV Management; older: General).",
+     "detail": "Also enable the driver's input delay timer (~2000 ms). Uses a little standby power.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/41828-lg-ip-control-for-2022-oled-tvs/",
+      "https://www.lg.com/us/support/help-library/how-to-turn-quick-start-on-or-off-on-your-lg-tv--20155512833565"
+     ]
+    },
+    {
+     "id": "lg.issue.turns-once-then-won-t",
+     "title": "Turns on once, then won't wake (or stops after a reset)",
+     "symptom": "Power-on works after adding the driver, but once off, WoL no longer wakes it.",
+     "fix": "After any factory reset or mains power cut, re-check Quick Start+, LivePlus and Mobile TV On.",
+     "detail": "One poster has to power the TVs with the LG remote after a mains cut before Control4 works again.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/42563-lg-not-turning-on-with-wol/"
+     ]
+    },
+    {
+     "id": "lg.issue.wol-fails-wired-wrong-mac",
+     "title": "WoL fails on wired: wrong MAC or crossing subnets",
+     "symptom": "TV wakes over Wi-Fi but not Ethernet.",
+     "fix": "Put the TV's wired MAC in the driver (it had kept the Wi-Fi MAC) and keep the TV on the controller's subnet.",
+     "detail": "Controller sends WoL to 255.255.255.255 UDP 9; blocked by routers/firewalls in between.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/21853-lg-tv-ip-driver-released/page/5/",
+      "https://www.c4forums.com/topic/37159-adding-multiple-lg-tv-ip-into-project/"
+     ]
+    },
+    {
+     "id": "lg.issue.wi-fi-only-connection-laggy",
+     "title": "Wi-Fi-only connection is laggy and unreliable",
+     "symptom": "~2 s lag, apps don't launch, On fails after hours off.",
+     "fix": "Hard-wire the TV and delete the Wi-Fi network from it, then re-enter the MAC/IP and re-pair the driver.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/23060-annex4-lg-driver-issues/",
+      "https://www.c4forums.com/topic/32935-lg-tv-inconsistent-control/"
+     ]
+    },
+    {
+     "id": "lg.issue.oled-pixel-refresh-needs-mains",
+     "title": "OLED pixel refresh needs mains power after switch-off",
+     "symptom": "Cutting power at room off (switched outlet/relay) stops the OLED compensation cycle.",
+     "fix": "Never cut mains to LG OLEDs as part of room off; leave them in standby.",
+     "detail": "LG: pixel cleaning won't run if unplugged; the 2,000-hour run takes about an hour.",
+     "evidence": "vendor",
+     "sources": [
+      "https://lg.com/in/tvs/oled-tvs/oled-reliability",
+      "https://www.lg.com/in/support/product-support/troubleshoot/help-library/cs-CT52006584-20153710651188OLT/"
+     ]
+    },
+    {
+     "id": "lg.issue.simplink-hdmi-cec-fights-control4",
+     "title": "SimpLink (HDMI-CEC) fights Control4 power",
+     "symptom": "TV turns on/off by itself or fails to turn off from Control4.",
+     "fix": "Turn SimpLink off (webOS 22: General > Devices > HDMI Settings > SimpLink (HDMI-CEC); 2020: Connection > Device Connection Settings; 2019: Connection > HDMI Device Settings).",
+     "detail": "Also check the Power On Timer.",
+     "evidence": "vendor",
+     "sources": [
+      "https://www.lg.com/uk/support/product-support/troubleshoot/help-library/cs-CT00008333-20155132564902/",
+      "https://www.lg.com/us/support/help-library/lg-tv-why-does-my-tv-turn-on-by-itself--20153353111993"
+     ]
+    },
+    {
+     "id": "lg.issue.firmware-update-clears-ip-pairing",
+     "title": "Firmware update clears IP pairing: add IR fallback",
+     "symptom": "Network control stops after a TV update clears the pairing.",
+     "fix": "In the McGlothlin LG WebOS driver set IR Setting to 'IR WOL Fallback' (or RS-232) with an emitter on the TV.",
+     "detail": "Sends backup power-on if no response in 8 s. Apps still need network.",
+     "evidence": "vendor",
+     "sources": [
+      "https://drivercentral.io/platforms/control4-drivers/audio-video/lg-webos-tv/"
+     ]
+    },
+    {
+     "id": "lg.issue.changes-made-outside-control4-aren",
+     "title": "Changes made outside Control4 aren't seen",
+     "symptom": "Programming on TV on/off doesn't fire when the TV's own remote or AirPlay is used.",
+     "fix": "Wire the TV's USB port (5 V when on) to a controller contact input and trigger from that.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/38720-lg-tv-power-onoff-detection-not-working/"
+     ]
+    },
+    {
+     "id": "lg.issue.toast-notifications-unpair-older-webos",
+     "title": "Toast notifications unpair older webOS",
+     "symptom": "Sending a toast unpaired a webOS 4.1 TV; icon toasts fail on 4.5.",
+     "fix": "Send text-only toasts, or turn toast programming off on affected TVs.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/topic/32935-lg-tv-inconsistent-control/"
+     ]
     }
    ]
   },
@@ -331,6 +668,122 @@
      "text": "Static IP via DHCP reservation.",
      "verified": true
     }
+   ],
+   "issues": [
+    {
+     "id": "samsung.issue.ip-remote-power-mobile-must",
+     "title": "IP Remote and Power On with Mobile must both be on",
+     "symptom": "Driver controls the TV but won't power it on, or won't pair.",
+     "fix": "Connection > Network > Expert Settings: IP Remote = Enable and Power On With Mobile = On (2021 and older: General > Network > Expert Settings).",
+     "detail": "Drivers split 2019-and-earlier vs 2020-and-later (port change). Wire for WoL.",
+     "evidence": "vendor",
+     "sources": [
+      "https://image-us.samsung.com/SamsungUS/samsungbusiness/tv-ci-resources/Samsung-IP-Control.pdf",
+      "https://support.ava.com/hc/en-us/articles/22550948779293-Samsung-TV-IP-Driver-does-not-Turn-On-the-TV"
+     ]
+    },
+    {
+     "id": "samsung.issue.no-allow-prompt-when-pairing",
+     "title": "No 'Allow' prompt when pairing",
+     "symptom": "Pair with TV shows no pop-up, or control is lost later.",
+     "fix": "With the TV on, toggle IP Remote off/on, delete old paired devices (or factory reset), pair again and press Allow on the Samsung remote.",
+     "detail": "Some EU models up to 2021 never show the prompt.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/43875-unable-to-control-samsung-qn85qn85cafxza-tv/",
+      "https://www.c4forums.com/forums/topic/43822-samsung-tv-control4-driver/"
+     ]
+    },
+    {
+     "id": "samsung.issue.wrong-mac-driver-breaks-wol",
+     "title": "Wrong MAC in the driver breaks WoL",
+     "symptom": "Power-on fails after the TV has been off a while.",
+     "fix": "Read the MAC at Settings > Support > About This TV and enter it by hand in the driver.",
+     "detail": "After ~1 minute off, only WoL wakes it, so send both IP power-on and WoL.",
+     "evidence": "vendor",
+     "sources": [
+      "https://image-us.samsung.com/SamsungUS/samsungbusiness/tv-ci-resources/Samsung-IP-Control.pdf",
+      "https://www.c4forums.com/forums/topic/24133-samsung-tv-ip-drivers/"
+     ]
+    },
+    {
+     "id": "samsung.issue.frame-art-mode-full-off",
+     "title": "Frame: Art Mode or full off at room off",
+     "symptom": "Room Off sends the Frame to Art Mode, too bright in bedrooms.",
+     "fix": "Set the driver's 'On Power Off' property to Power Off or Art Mode to suit the room.",
+     "detail": "Can be changed on a schedule by programming the property, then on then off.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/24653-samsung-frame-tv-ip-driver/",
+      "https://c4forums.com/forums/topic/34055-samsung-frame-tv-2019-model"
+     ]
+    },
+    {
+     "id": "samsung.issue.frame-won-t-power-from",
+     "title": "Frame won't power on from full off",
+     "symptom": "Fully off Frame stops answering ping/WoL; reliable only from Art Mode.",
+     "fix": "Add the Frame by DHCP reservation/IP rather than SDDP, and power off to Art Mode.",
+     "detail": "No confirmed fix; consider RS-232/IR for power.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/43746-samsung-frame-wol-issues/"
+     ]
+    },
+    {
+     "id": "samsung.issue.frame-unresponsive-morning-sddp-unknown",
+     "title": "Frame unresponsive in the morning (SDDP unknown-Mac)",
+     "symptom": "Control4 shows Art Mode but the screen is black and commands are ignored.",
+     "fix": "Change the driver from SDDP to IP identification with a DHCP reservation.",
+     "detail": "Also: driver retry count above 4, turn off the TV's Night Mode if Sleep After is used.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/44074-frame-tv-unresponsive-in-the-mornings/"
+     ]
+    },
+    {
+     "id": "samsung.issue.frame-art-mode-mini-driver",
+     "title": "Frame Art Mode mini-driver",
+     "symptom": "Art Mode missing from Watch, or the mini-app rarely works.",
+     "fix": "Install the Samsung Art Mode mini driver in the same room, connect it, then Refresh Navigators.",
+     "detail": "Driver doesn't expose the Frame's motion sensor; use a separate sensor. Programmed Art Mode is more reliable than the mini-app.",
+     "evidence": "vendor",
+     "sources": [
+      "https://techsupportblog.control4.com/?p=103"
+     ]
+    },
+    {
+     "id": "samsung.issue.eu-uk-models-without-ip",
+     "title": "EU/UK models without IP Remote",
+     "symptom": "Expert Settings > IP Remote missing, or no driver for a QE-prefix model.",
+     "fix": "Update the TV firmware; if IP Remote is still missing, use RS-232 (ex-link) or IR.",
+     "detail": "QE/UE = EU, QN/UN = US. Newer One Connect boxes may lack ex-link.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/43822-samsung-tv-control4-driver/",
+      "https://www.c4forums.com/forums/topic/40194-samsung-ip-driver/"
+     ]
+    },
+    {
+     "id": "samsung.issue.sddp-discovery-fails-some-models",
+     "title": "SDDP discovery fails on some models",
+     "symptom": "TV never appears in Discovered Devices.",
+     "fix": "Add the driver by hand with a DHCP reservation and the correct MAC.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://c4forums.com/forums/topic/34071-samsung-un75nu6900-ip-driver-issue"
+     ]
+    },
+    {
+     "id": "samsung.issue.cutting-mains-power-switched-outlet",
+     "title": "Cutting mains power with a switched outlet",
+     "symptom": "Installers cut power to a Frame/One Connect at night to force a clean off.",
+     "fix": "Avoid routine power cuts; if you must, turn off TV auto-updates first.",
+     "detail": "Risk of corruption during firmware writes.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://c4forums.com/forums/topic/45493-connecting-a-samsung-one-connect-to-a-control4-receptacle-outlet-switch"
+     ]
+    }
    ]
   },
   "sony": {
@@ -377,7 +830,129 @@
     {
      "id": "sony.older-pre-google-tv",
      "text": "older (pre-Google TV) menus call it 'Remote start' (Settings > Network > Remote start > On) and 'Simple IP control'.",
-     "verified": false
+     "verified": true
+    }
+   ],
+   "issues": [
+    {
+     "id": "sony.issue.pre-shared-key-lost-reset",
+     "title": "Pre-shared key lost after reset or update",
+     "symptom": "After a reset or update Control4 can't control the TV.",
+     "fix": "Re-set IP control Authentication = Pre-Shared Key with the same key as the driver, and re-set the static IP.",
+     "detail": "Android TV path: Settings > BRAVIA Settings > IP control.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/24060-sony-tv-not-responding-to-control4-after-reset/",
+      "https://helpguide.sony.net/tv/ggar1/v1/en-142/07-02_17.html"
+     ]
+    },
+    {
+     "id": "sony.issue.remote-start-needed-network-power",
+     "title": "Remote start needed for network power-on",
+     "symptom": "TV can't be turned on over the network.",
+     "fix": "Turn on Remote start (Settings > BRAVIA Settings > Remote start, or Network and Internet > Remote start).",
+     "evidence": "vendor",
+     "sources": [
+      "https://helpguide.sony.net/tv/ggar1/v1/en-142/07-02_06.html",
+      "https://helpguide.sony.net/tv/maep3/v1/en/07_09.html"
+     ]
+    },
+    {
+     "id": "sony.issue.tv-drops-off-network-daily",
+     "title": "TV drops off the network daily (deep sleep)",
+     "symptom": "TV stops answering ping and won't power on; 'LAN Failed' (2021 A80J/A90J/X800H).",
+     "fix": "Turn Simple IP control On at the TV (Network > Home Network > IP control > Simple IP control), even if the driver uses the Web API.",
+     "detail": "Sony: Simple IP control prevents suspend. Helps but isn't always a cure.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/39347-sony-tv-not-staying-connected/",
+      "https://pro-bravia.sony.net/setup/device-settings/red-da/",
+      "https://helpguide.sony.net/tv/naep2/v1/en/contents/TP1002006307.html"
+     ]
+    },
+    {
+     "id": "sony.issue.driver-network-api-simple-vs",
+     "title": "Driver network API: Simple vs Web",
+     "symptom": "IP control intermittent.",
+     "fix": "Set the Control4 Sony driver's network API to Simple; if a TV drops, toggle Web then Simple.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/39615-issue-with-ip-control-any-help/"
+     ]
+    },
+    {
+     "id": "sony.issue.ip-changes-despite-static-setting",
+     "title": "IP changes despite static setting",
+     "symptom": "TV's IP changes and control is lost.",
+     "fix": "Set a static IP on the TV and a matching DHCP reservation on the router.",
+     "detail": "Experiences with SDDP vs IP conflict.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/39615-issue-with-ip-control-any-help/",
+      "https://www.c4forums.com/forums/topic/26932-sony-bravia-wont-stay-off/"
+     ]
+    },
+    {
+     "id": "sony.issue.update-switches-simple-ip-off",
+     "title": "Update switches Simple IP off; A95L ignores IR power-on",
+     "symptom": "Control stops after an update; A95L ignores discrete IR ON in deep sleep.",
+     "fix": "After any update, check Simple IP control and toggle it off and on.",
+     "evidence": "vendor",
+     "sources": [
+      "https://urcfaq.knowledgeowl.com/help/setting-simple-ip-control-for-sony-tvs"
+     ]
+    },
+    {
+     "id": "sony.issue.bravia-sync-arc-turns-tv",
+     "title": "BRAVIA Sync / ARC turns the TV off",
+     "symptom": "TV powers on from Control4 then switches itself off (soundbar on ARC).",
+     "fix": "Turn off BRAVIA Sync / CEC, or use optical instead of ARC.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/40041-sony-android-tv/"
+     ]
+    },
+    {
+     "id": "sony.issue.tv-turns-but-won-t",
+     "title": "TV turns on but won't turn off",
+     "symptom": "A 2023 KD-75X77CL powers on from Control4 but never turns off over IR.",
+     "fix": "Turn off HDMI-CEC and move the driver to IP control.",
+     "detail": "Unresolved in threads.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://c4forums.com/forums/topic/46180-sony-tv-wont-turn-off"
+     ]
+    },
+    {
+     "id": "sony.issue.android-bravia-locks-up-under",
+     "title": "Android BRAVIA locks up under IP control",
+     "symptom": "TV locks up and needs a power cycle, or knocks out the network.",
+     "fix": "Update the TV firmware; if it continues, control by IR and use an external streamer.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/28029-sony-tvs-and-projectors-locking-up-or-disabling-the-network/"
+     ]
+    },
+    {
+     "id": "sony.issue.fallback-ir-plus-external-streamer",
+     "title": "Fallback: IR plus external streamer",
+     "symptom": "IP control stays unreliable on some units.",
+     "fix": "Control power and input by IR or serial and use an Apple TV or Roku for apps.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/39615-issue-with-ip-control-any-help/"
+     ]
+    },
+    {
+     "id": "sony.issue.eu-bravia-professional-control-remotely",
+     "title": "EU BRAVIA Professional: Control Remotely off by default",
+     "symptom": "IP control doesn't respond on EU pro displays after RED-DA changes.",
+     "fix": "Settings > Network & Internet > Remote device settings > Control Remotely > On, then enable the Control4 item, Pre-Shared Key and Simple IP control under IP control.",
+     "detail": "Pro displays only, not consumer sets.",
+     "evidence": "vendor",
+     "sources": [
+      "https://pro-bravia.sony.net/setup/device-settings/red-da/"
+     ]
     }
    ]
   },
@@ -415,6 +990,98 @@
      "text": "DHCP reservation, wired. Marantz uses the same menus and protocol.",
      "verified": true
     }
+   ],
+   "issues": [
+    {
+     "id": "denon.issue.avr-won-t-power-over",
+     "title": "AVR won't power on over IP from standby",
+     "symptom": "Control4 controls the AVR once on but can't turn it on.",
+     "fix": "Denon: Settings > Network > Network Control > Always On. Marantz: Settings > Network > IP Control > Always On.",
+     "detail": "Default on some Denons (AVC-S670H) is Off In Standby. Uses more standby power.",
+     "evidence": "vendor",
+     "sources": [
+      "https://manuals.denon.com/AVCS670H/EU/en/HJWMSYmehwmguq.php",
+      "https://manuals.marantz.com/SR7009/NA/EN/HJWMSYmehwmguq.php"
+     ]
+    },
+    {
+     "id": "denon.issue.only-one-telnet-control-session",
+     "title": "Only one telnet control session at a time",
+     "symptom": "A second IP controller (Home Assistant, another driver or app) is refused or knocks Control4 off.",
+     "fix": "Make sure only the Control4 driver holds the AVR's telnet session; remove other telnet integrations to that AVR.",
+     "detail": "From the Home Assistant Denon integration docs, not Denon.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.home-assistant.io/integrations/denon/"
+     ]
+    },
+    {
+     "id": "denon.issue.control-lost-power-cut-ip",
+     "title": "Control lost after a power cut, IP change or firmware update",
+     "symptom": "Control4 can't power on the AVR or change volume after a power blip or update; other functions may still work.",
+     "fix": "Give the AVR a DHCP reservation by MAC, then power-cycle it.",
+     "detail": "One firmware update changed the AVR's IP setup; turning DHCP off on the AVR restored control. Workaround for on-then-off: 3 s delay before the final ON/OFF in macros.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/14736-marantz-sr-series-power-commands/",
+      "https://c4forums.com/forums/topic/33287-av-receiver-not-responding-after-firmware-update",
+      "https://www.c4forums.com/forums/topic/38420-sr-260-remote-volume-not-working/"
+     ]
+    },
+    {
+     "id": "denon.issue.online-composer-but-commands-do",
+     "title": "Online in Composer but commands do nothing",
+     "symptom": "AVR (X1400H) shows Online but only Connect/Disconnect work; log shows repeated poll failures.",
+     "fix": "Check Network Control is Always On and HDMI Control is off; if it still fails, factory-reset the AVR and add it again.",
+     "detail": "Factory reset fixed it for the poster.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/25117-denon-avr-x1400h-no-response-on-ip-comand/"
+     ]
+    },
+    {
+     "id": "denon.issue.volume-runs-away-one-volume",
+     "title": "Volume runs away after one volume-up",
+     "symptom": "One volume-up keeps raising volume until the LAN cable is pulled (AVR-X2100, SR6008).",
+     "fix": "Give the AVR a DHCP reservation and check the network for faults.",
+     "detail": "Cause not confirmed; suspected network problem.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/15754-problem-with-av-receivers-volume-control/"
+     ]
+    },
+    {
+     "id": "denon.issue.input-jumps-cd-when-avr",
+     "title": "Input jumps to CD when the AVR has two audio paths",
+     "symptom": "After OS 3.4, Denon zones switch from CBL/SAT to CD about 2 s after any Watch selection.",
+     "fix": "Fix bindings so video sources have only one audio path into the receiver, or add the AV Path Setter driver per room.",
+     "detail": "Seen with a video matrix to CBL/SAT plus an audio matrix to CD. Also check for leftover programming from a previous dealer.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/43380-denon-video-input-switching-to-cd/"
+     ]
+    },
+    {
+     "id": "denon.issue.heos-grouping-out-sync-control4",
+     "title": "HEOS grouping out of sync with Control4",
+     "symptom": "Music plays in the wrong rooms; zones not ungrouped at room off.",
+     "fix": "Do all grouping from Control4, not the HEOS app.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/25307-heos-group-issues/"
+     ]
+    },
+    {
+     "id": "denon.issue.no-volume-feedback-over-rs",
+     "title": "No volume feedback over RS-232",
+     "symptom": "Volume slider doesn't work on an RS-232 Denon because no level comes back.",
+     "fix": "Use the IP driver rather than serial where the model supports it.",
+     "detail": "Posters disagree on whether serial feedback broke after OS 2.10.6.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://c4forums.com/forums/topic/30511-os3-volume-slider-issue-sony-sound-bar/page/4"
+     ]
+    }
    ]
   },
   "yamaha": {
@@ -450,6 +1117,83 @@
      "id": "yamaha.dhcp-reservation-wired-yamaha",
      "text": "DHCP reservation, wired. Yamaha MusicCast models also integrate with Control4 for MusicCast control.",
      "verified": true
+    }
+   ],
+   "issues": [
+    {
+     "id": "yamaha.issue.network-standby-needed-ip-power",
+     "title": "Network Standby needed for IP power-on",
+     "symptom": "Yamaha AVR can't be powered on over IP.",
+     "fix": "Setup > Network > Network Standby > On (or Auto when wired).",
+     "detail": "Off also disables Bluetooth standby. Auto goes power-saving if the cable is unplugged.",
+     "evidence": "vendor",
+     "sources": [
+      "https://manual.yamaha.com/av/18/rxa880/en-US/319118475.html"
+     ]
+    },
+    {
+     "id": "yamaha.issue.several-yamaha-avrs-drop-off",
+     "title": "Several Yamaha AVRs drop off Control4",
+     "symptom": "With more than one IP Yamaha, receivers keep going offline; queued keep-alives can flood the controller.",
+     "fix": "Keep the default control port (50000), and use RS-232 where the AVR has it.",
+     "detail": "Moving off 50000 caused false offline. One poster cured it by replacing a consumer router (AirPort Extreme).",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/18648-multiple-yamaha-receivers-dropping-off-the-network-was-intermittent-now-constant-on-28/"
+     ]
+    },
+    {
+     "id": "yamaha.issue.rx-a1030-loses-ip-control",
+     "title": "RX-A1030 loses IP control until power-cycled",
+     "symptom": "Receiver keeps dropping IP control until unplugged.",
+     "fix": "Delete the Yamaha driver from the project and add it again.",
+     "detail": "Others blamed a consumer router.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/15429-help-with-2-issues-please/"
+     ]
+    },
+    {
+     "id": "yamaha.issue.network-standby-stops-answering-hours",
+     "title": "Network standby stops answering after hours",
+     "symptom": "AVR answers ping but refuses control after hours to a day in standby; waking by hand restores it.",
+     "fix": "Update the AVR firmware; power-cycle if it recurs.",
+     "detail": "RX-A810, Home Assistant forum.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://community.home-assistant.io/t/yamaha-avr-network-not-standing-by/1011505"
+     ]
+    },
+    {
+     "id": "yamaha.issue.receiver-power-tied-source-selection",
+     "title": "Receiver power tied to source selection",
+     "symptom": "Receiver On/Off actions don't work on RX-A1010; it only powers with a source or Room Off.",
+     "fix": "Program zone power with the device-specific commands.",
+     "detail": "MAIN and ZONE2 power behave as toggles.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/10625-cant-just-turn-on-or-off-a-yamaha-aventage-rx-a1010-receiver/"
+     ]
+    },
+    {
+     "id": "yamaha.issue.no-driver-custom-install-tsr",
+     "title": "No driver for custom-install TSR models",
+     "symptom": "TSR-7850/8750 isn't in the Control4 driver database.",
+     "fix": "Use the IP driver for the matching-year RX-A model (e.g. RX-A870) and add the AVR by fixed IP.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/36289-yamaha-tsr-7850-and-control4/"
+     ]
+    },
+    {
+     "id": "yamaha.issue.zone-2-off-appears-inverted",
+     "title": "Zone 2 on/off appears inverted",
+     "symptom": "Zone 2 speakers play when Zone 2 shows off; no independent Zone 2 volume (TSR-7850).",
+     "fix": "Choose a '+Zone 2' amp assignment with Zone 2 speakers on EXTRA SP and set unused surround backs to NONE.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://forums.audioholics.com/forums/goto/post?id=1503174"
+     ]
     }
    ]
   },
@@ -491,6 +1235,74 @@
      "id": "onkyo.dhcp-reservation-wired-menu",
      "text": "DHCP reservation, wired. Menu names are from the TX-NR7100; other models may differ.",
      "verified": true
+    }
+   ],
+   "issues": [
+    {
+     "id": "onkyo.issue.network-standby-off-disabled-automatically",
+     "title": "Network Standby off or disabled automatically",
+     "symptom": "AVR won't power on over IP, or sleeps on its own.",
+     "fix": "Setup > Power Management (or Hardware) > Network Standby > On, and Auto Standby > Off.",
+     "detail": "Onkyo warns Network Standby may be disabled automatically if the network drops; then only the remote/front panel can power it on.",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.onkyousa.com/hc/en-us/articles/9675098736916-TX-NR5100-Setup-Menu-Power-Management"
+     ]
+    },
+    {
+     "id": "onkyo.issue.driver-offline-when-avr-standby",
+     "title": "Driver offline when the AVR is in standby",
+     "symptom": "TX-RZ900 shows offline when the room is off and won't turn on from Control4.",
+     "fix": "Confirm Network Standby is On and reserve the AVR's MAC on the router.",
+     "detail": "Unresolved in the thread.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/23119-problems-with-onkyo-receiver/"
+     ]
+    },
+    {
+     "id": "onkyo.issue.pioneer-onkyo-network-control-drops",
+     "title": "Pioneer/Onkyo network control drops every few weeks",
+     "symptom": "AVR drops off the network every couple of weeks; power cycle restores it.",
+     "fix": "Control it by RS-232 (3.5mm-to-DB9 from the controller).",
+     "detail": "Also update firmware by USB rather than network. On some units network and serial share a board.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/21506-pioneer-av-receivers-dropping-off-control4-network/page/2/"
+     ]
+    },
+    {
+     "id": "onkyo.issue.room-off-doesn-t-put",
+     "title": "Room Off doesn't put the AVR in standby",
+     "symptom": "TX-NR3008 stays on after Room Off.",
+     "fix": "Check no other zone is still on.",
+     "detail": "Unresolved; serial driver only helped for a day.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/9733-onkyo-receiver-driver/"
+     ]
+    },
+    {
+     "id": "onkyo.issue.rs-232-ignored-while-avr",
+     "title": "RS-232 ignored while the AVR is also networked",
+     "symptom": "Integra DRX-4 didn't respond on serial while still on the LAN.",
+     "fix": "Change the control binding in Composer from IP to serial (unplugging the network cable also made it work).",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/41672-controlling-integra-avr-via-rs232/"
+     ]
+    },
+    {
+     "id": "onkyo.issue.cec-arc-fights-control4",
+     "title": "CEC/ARC fights Control4",
+     "symptom": "Devices switch power or inputs by themselves with CEC on for ARC.",
+     "fix": "Run optical from TV to AVR for TV audio and disable CEC and ARC on both.",
+     "detail": "Atmos from TV apps needs eARC, so weigh this.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/38169-roku-control4-hdmi-cec/",
+      "https://www.c4forums.com/topic/36113-control4-and-hdmi-arc/"
+     ]
     }
    ]
   },
@@ -535,6 +1347,104 @@
      "text": "Settings > System > Power > Fast TV start On (Roku TVs) so it wakes over the network; turn HDMI-CEC (Settings > System > Control other devices) off.",
      "verified": false
     }
+   ],
+   "issues": [
+    {
+     "id": "roku.issue.roku-os-14-1-sets",
+     "title": "Roku OS 14.1+ sets Network Access to Limited",
+     "symptom": "After a Roku update the Control4 driver stops controlling it (all control systems).",
+     "fix": "Settings > System > Advanced System Settings > Control by Mobile Apps > Network Access > Enabled, accept the warning, then power-cycle the Roku for 2-3 minutes.",
+     "detail": "Roku ECP docs: from 14.1 keypresses need Enabled. Updates can revert it; one user needed a factory reset.",
+     "evidence": "vendor",
+     "sources": [
+      "https://techsupportblog.control4.com/?p=1345",
+      "https://developer.roku.com/dev/docs/external-control-api",
+      "https://support-thlproducts.freshdesk.com/support/solutions/articles/73000654068-control4-does-not-control-roku"
+     ]
+    },
+    {
+     "id": "roku.issue.control-lost-again-os-14",
+     "title": "Control lost again after OS 14.6.4 (July 2025)",
+     "symptom": "Control4 control stopped while the Roku app still worked.",
+     "fix": "Set Network access to Enabled or Permissive (it had reverted to Limited).",
+     "detail": "One Ultra only worked on Permissive.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://community.roku.com/discussions/tv-and-players/control4-remote-not-working-with-14-6-4-update/1083904"
+     ]
+    },
+    {
+     "id": "roku.issue.uk-menu-wording-differs",
+     "title": "UK menu wording differs",
+     "symptom": "UK installers can't find 'Control by mobile apps'.",
+     "fix": "UK path: Home > Settings > System > Advanced system settings > External Control > Network access > Default or Permissive (not Disable).",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.roku.com/en-gb/article/can-my-roku-streaming-device-be-controlled-using-an-app"
+     ]
+    },
+    {
+     "id": "roku.issue.changing-setting-racked-roku",
+     "title": "Changing the setting on a racked Roku",
+     "symptom": "A rack Roku has no screen, so the setting can't be changed after an update breaks control.",
+     "fix": "Change it from the Roku mobile app on the same network, or plug the Roku into a temporary TV.",
+     "detail": "Consider an IR driver as a backup.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.reddit.com/r/Control4/comments/1l0tz87/roku_player_driver/"
+     ]
+    },
+    {
+     "id": "roku.issue.driver-can-t-find-rokus",
+     "title": "Driver can't find Rokus on rescan",
+     "symptom": "Rokus stop responding and rescan doesn't find them.",
+     "fix": "Enter the Roku's IP in the driver properties (with a DHCP reservation) and give each Roku a unique name.",
+     "detail": "Identical names caused failures; 8 posters confirmed.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/42096-roku-ultra-stopped-working/"
+     ]
+    },
+    {
+     "id": "roku.issue.ecp-port-8060-ssdp-across",
+     "title": "ECP port 8060 and SSDP across VLANs",
+     "symptom": "Roku reachable but the driver can't discover or control it across VLANs/firewalls.",
+     "fix": "Allow TCP 8060 from controller to Roku and SSDP 239.255.255.250:1900; test by browsing to http://roku-ip:8060.",
+     "evidence": "vendor",
+     "sources": [
+      "https://developer.roku.com/dev/docs/external-control-api"
+     ]
+    },
+    {
+     "id": "roku.issue.roku-tv-can-t-be",
+     "title": "Roku TV can't be woken from deep standby",
+     "symptom": "A Roku TV in low-power standby doesn't answer SSDP, so IP can't wake it.",
+     "fix": "Keep IR as the power-on fallback for Roku TVs.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://forum.developer.roku.com/t/any-ways-to-wake-up-a-roku-tv-in-lower-power-state/11325"
+     ]
+    },
+    {
+     "id": "roku.issue.mini-apps-launch-but-no",
+     "title": "Mini apps launch but no navigation",
+     "symptom": "Control4 mini apps launch on the Roku but navigation doesn't work afterwards.",
+     "fix": "Check the room's audio bindings from the Roku to the audio endpoint; if that fails, turn off pass-through in device properties.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/38015-roku-ultra-launches-mini-apps-but-no-app-control/"
+     ]
+    },
+    {
+     "id": "roku.issue.roku-cec-vs-control4",
+     "title": "Roku CEC vs Control4",
+     "symptom": "With CEC on, the Roku and other devices change power or inputs themselves.",
+     "fix": "Disable CEC on the Roku and the display.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/38169-roku-control4-hdmi-cec/"
+     ]
+    }
    ]
   },
   "sonos": {
@@ -564,6 +1474,117 @@
      "id": "sonos.arc-beam-ray-tv",
      "text": "Arc/Beam/Ray on TV: they use HDMI-CEC/eARC for TV audio, so keep CEC on for that TV input only if the Sonos is the TV's sound.",
      "verified": true
+    }
+   ],
+   "issues": [
+    {
+     "id": "sonos.issue.jan-2025-volume-drops-zero",
+     "title": "Jan 2025 volume drops to zero",
+     "symptom": "Sonos volume jumps to 0 when controlled from Control4.",
+     "fix": "Update Sonos players to the latest firmware (Control4 fix rolled out automatically).",
+     "detail": "Sonos staff confirmed; resolved.",
+     "evidence": "vendor",
+     "sources": [
+      "https://en.community.sonos.com/smart-home-integrations-229108/sonos-volume-going-to-zero-when-using-control-4-6925925"
+     ]
+    },
+    {
+     "id": "sonos.issue.use-current-sonos-driver-set",
+     "title": "Use the current Sonos driver set",
+     "symptom": "Missing features, or players lost after IP changes.",
+     "fix": "Use the current drivers: Sonos (sonos.c4z), Sonos Network and Sonos Global Line In.",
+     "detail": "SDDP on TCP 1400 (main driver only). Min OS 2.8.2.",
+     "evidence": "vendor",
+     "sources": [
+      "https://drivers.control4.com/solr/drivers/browse?q=Sonos",
+      "https://www.c4forums.com/topic/31934-new-sonos-integration/"
+     ]
+    },
+    {
+     "id": "sonos.issue.stp-managed-switches",
+     "title": "STP on managed switches",
+     "symptom": "Wired or mixed wired/SonosNet players drop out or loop on managed switches.",
+     "fix": "Enable STP with the main switch at bridge priority 4096 and Sonos ports as edge ports (BPDU Guard and Root Guard off).",
+     "detail": "Sonos STP article. Use STP not RSTP for hybrid wired/SonosNet, and prefer all-wired or all-wireless.",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.sonos.com/en-us/article/configure-stp-settings-to-work-with-sonos",
+      "https://support.omadanetworks.com/uk/document/131292/"
+     ]
+    },
+    {
+     "id": "sonos.issue.multicast-igmp-managed-wi-fi",
+     "title": "Multicast/IGMP on managed Wi-Fi",
+     "symptom": "Discovery and control unreliable on managed Wi-Fi.",
+     "fix": "Enable IGMP snooping on the Sonos LAN and turn off multicast-to-unicast and multicast filtering on the Sonos SSID.",
+     "detail": "Keep all Sonos on one subnet, never a guest network.",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.omadanetworks.com/uk/document/131292/"
+     ]
+    },
+    {
+     "id": "sonos.issue.reserve-ips-bonded-surrounds",
+     "title": "Reserve IPs for bonded surrounds",
+     "symptom": "Bonded surrounds on SonosNet drop out of the router's DHCP/ARP tables; random disconnects.",
+     "fix": "Make a DHCP reservation for every Sonos unit, including surrounds and subs.",
+     "detail": "Disputed; some run fine without.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://en.community.sonos.com/speakers-229128/why-you-should-always-set-static-reserved-ips-for-your-sonos-gear-the-sonosnet-blind-spot-6934052"
+     ]
+    },
+    {
+     "id": "sonos.issue.arc-keeps-playing-room-off",
+     "title": "Arc keeps playing after Room Off",
+     "symptom": "Room Off turns the projector off but the Arc and Sub keep playing.",
+     "fix": "Check bindings so the Sonos driver has a valid audio output path (or a dummy audio connection).",
+     "detail": "Matrix kept sending audio, so the Arc stayed on input. Not confirmed fixed.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/39010-sonos-doesnt-turn-off-during-room-off/"
+     ]
+    },
+    {
+     "id": "sonos.issue.can-t-group-while-arc",
+     "title": "Can't group while the Arc is in Watch",
+     "symptom": "While the Arc is in Watch, other Sonos rooms aren't offered for grouping in Control4.",
+     "fix": "Group from the Sonos app meanwhile and report it to Control4.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://en.community.sonos.com/smart-home-integrations-229108/control4-unable-to-group-zones-when-using-the-watch-activity-6929903"
+     ]
+    },
+    {
+     "id": "sonos.issue.connect-volume-jumps-0-100",
+     "title": "Connect volume jumps to 0 or 100% after OS upgrade",
+     "symptom": "After Core3 and OS 3.4.3, Connects on pass-through jump to 0% or 100%.",
+     "fix": "Update Sonos and Control4 firmware and raise it with Control4 support.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://en.community.sonos.com/components-architectural-228999/control-4-and-sonos-connects-6929553"
+     ]
+    },
+    {
+     "id": "sonos.issue.driver-limits-explain-client",
+     "title": "Driver limits to explain to the client",
+     "symptom": "50 favourites limit, no 'is playing' conditionals, no line-in switching (breaks doorbell announcements).",
+     "fix": "Use the Sonos Global Line In driver for line-in sources and set expectations with the client.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://en.community.sonos.com/advanced-setups-229000/endorsed-control4-drivers-6787376",
+      "https://en.community.sonos.com/components-and-architectural-228999/sonos-and-control4-6895716"
+     ]
+    },
+    {
+     "id": "sonos.issue.port-line-lag-tv-audio",
+     "title": "Port line-in lag as TV audio endpoint",
+     "symptom": "TV audio through a Port line-in lags the picture by seconds.",
+     "fix": "Set the line-in Audio Delay to minimum (~75 ms) on the Port with the line-in, and wire the Ports.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://en.community.sonos.com/components-architectural-228999/sonos-port-line-in-audio-delay-setting-6927146"
+     ]
     }
    ]
   },
@@ -621,12 +1642,129 @@
     {
      "id": "pjlink.standby-mode-normal-not",
      "text": "Panasonic: Setup > Standby mode > Normal (not Eco), Network > PJLink on.",
-     "verified": false
+     "verified": true
     },
     {
      "id": "pjlink.dhcp-reservation-static-ip",
      "text": "DHCP reservation or static IP. PJLink is TCP 4352.",
      "verified": true
+    }
+   ],
+   "issues": [
+    {
+     "id": "pjlink.issue.epson-ip-power-needs-standby",
+     "title": "Epson: IP power-on needs Standby Mode 'Communication On'",
+     "symptom": "IP control is lost once the projector is off and Control4 can't turn it back on.",
+     "fix": "Set Standby Mode > Communication On (Operation or Extended menu), and where present set Priority Control Interface to the LAN port in use.",
+     "detail": "Chowmain's Epson Universal driver lists it as required. Epson: wired LAN stops responding if the link is lost for over 15 minutes.",
+     "evidence": "vendor",
+     "sources": [
+      "https://epson.com/faq/SPT_V11H976020~faq-0000c78-shared",
+      "https://drivercentral.io/platforms/control4-drivers/audio-video/epson-universal-projector",
+      "https://files.support.epson.com/docid/cpd6/cpd64101/source/menus/reference/ebpq2008b_2220b/extended_standby_mode_ebpq2008b_2220b.html"
+     ]
+    },
+    {
+     "id": "pjlink.issue.epson-ls12000-stops-responding-ip",
+     "title": "Epson LS12000 stops responding to IP power after 1-2 weeks",
+     "symptom": "With Epson's certified IP driver the projector works for 1-2 weeks then ignores power until unplugged.",
+     "fix": "Set the monitor password on both the projector and the driver (Epson support's advice).",
+     "detail": "If it still locks up, posters used a driver without authentication and disabled authentication on the projector. Same thread: EDID black screens at power-on fixed with an EDID manager.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.reddit.com/r/Control4/comments/1khg4ec/epson_ls12000_randomly_unresponsive/"
+     ]
+    },
+    {
+     "id": "pjlink.issue.projector-misses-off-powers-off",
+     "title": "Projector misses on/off or powers on and off by itself",
+     "symptom": "An Epson misses most power-ons and half of Room Offs, and switches on or off by itself.",
+     "fix": "Disable HDMI-CEC on sources, AVR and projector (including the projector's receiver-control option).",
+     "detail": "Also slow or disable driver polling (30 s polling queued tens of thousands of commands for one poster) and add ~10 s before the off command. Check long passive RS232-over-RJ45 runs.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/15860-random-projector-onoff-issue/"
+     ]
+    },
+    {
+     "id": "pjlink.issue.commands-lost-during-warm-up",
+     "title": "Commands lost during warm-up or cool-down",
+     "symptom": "An input command sent right after power-on is lost; commands blocked while cooling.",
+     "fix": "Use a two-way IP driver that waits for confirmed power-on before sending the input, or add a Composer Delay before the input command.",
+     "detail": "Chowmain PJLink driver polls every 5 s during power transitions.",
+     "evidence": "vendor",
+     "sources": [
+      "https://drivercentral.io/platforms/control4-drivers/audio-video/pjlink-universal-projector-control4-driver-chowmain",
+      "https://driverstore.rticontrol.com/driver/epson-powerlite",
+      "https://docs.control4.com/help/c4/software/cpro/dealer-composer-help/content/composerpro_userguide/delay_command.htm"
+     ]
+    },
+    {
+     "id": "pjlink.issue.screen-drops-2-minutes-late",
+     "title": "Screen drops 2 minutes late",
+     "symptom": "Motorised screen drops about 2 minutes after projector power-on and raises 2 minutes after Room Off.",
+     "fix": "Trigger the screen from the room's power state or video selection change, not from the projector's power event.",
+     "detail": "Control4 marks the projector On only after warm-up completes.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/15244-removing-a-delay-before-screen-is-dropped-following-projector-power-on/"
+     ]
+    },
+    {
+     "id": "pjlink.issue.nec-lan-port-sleeps-standby",
+     "title": "NEC: LAN port sleeps in standby (EuP)",
+     "symptom": "LAN (and probably HDBaseT) control is lost after the projector idles in standby.",
+     "fix": "Use SLEEP standby, or in the Expert menu (Help, Up, Left, Help, then Menu) set Setup > Expert > Standby mode setting > Disable.",
+     "detail": "LAN can switch off after 180 s with no traffic.",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.biamp.com/Biamp_Control/Control_configuration/NEC_projectors_and_LAN_control"
+     ]
+    },
+    {
+     "id": "pjlink.issue.panasonic-standby-mode-eco-disables",
+     "title": "Panasonic: Standby mode ECO disables network control",
+     "symptom": "The projector can't be powered on over IP.",
+     "fix": "Set Projector Setup > Eco Management > Standby Mode > Normal.",
+     "detail": "Near 0 °C warm-up can take ~5 minutes. Source is a pro (PT-RZ575) manual.",
+     "evidence": "vendor",
+     "sources": [
+      "https://ap.connect.panasonic.com/sites/default/files/media/document/2025-02/rz575_manual_en.pdf"
+     ]
+    },
+    {
+     "id": "pjlink.issue.panasonic-protect-mode-needs-md5",
+     "title": "Panasonic: protect mode needs an MD5 hash",
+     "symptom": "Control system shows connected but commands do nothing; projector asks for a 32-byte hash.",
+     "fix": "Use a driver that supports the password hash, or set non-protect mode (web control as admin, save with blank password fields).",
+     "detail": "Atlona KB; applies to any controller whose driver lacks the hash.",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.atlona.com/hc/en-us/articles/360051964833-KB01681-Panasonic-Projector-IP-Control-with-Velocity"
+     ]
+    },
+    {
+     "id": "pjlink.issue.pjlink-erra-err3-errors",
+     "title": "PJLink ERRA / ERR3 errors",
+     "symptom": "Commands fail with ERRA (auth error) or ERR3 (unavailable time, e.g. in standby).",
+     "fix": "Enter the exact PJLink password in the driver (or disable PJLink auth if the driver can't), and only send non-power commands once the projector reports On.",
+     "detail": "PJLink auth is MD5 of password + projector's random number; sessions close after 30 s.",
+     "evidence": "vendor",
+     "sources": [
+      "https://io-module-documentation.readthedocs.io/en/latest/iom/Device%20Integration/PJLink.html",
+      "https://drivercentral.io/platforms/control4-drivers/audio-video/pjlink-universal-projector-control4-driver-chowmain"
+     ]
+    },
+    {
+     "id": "pjlink.issue.hdmi-handshake-black-screen-power",
+     "title": "HDMI handshake black screen at power-up",
+     "symptom": "Intermittent black screen or no audio after Control4 powers the chain (projector, processor, AVR).",
+     "fix": "Power the projector last, with a power-on delay in the other devices' drivers.",
+     "detail": "A trigger that power-cycled the processor whenever the projector came on caused an endless loop.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/23108-power-startup-sequence-delay-hdmi-handshake-fun/"
+     ]
     }
    ]
   },
@@ -668,7 +1806,90 @@
     {
      "id": "jvc.ip-control-port-tcp",
      "text": "IP control port is TCP 20554 (JVC 'PJ_OK / PJREQ / PJACK' handshake).",
-     "verified": false
+     "verified": true
+    }
+   ],
+   "issues": [
+    {
+     "id": "jvc.issue.2024-models-nz900-nz800-rs4200",
+     "title": "2024+ models (NZ900/NZ800/RS4200/RS3200) don't work with older JVC drivers",
+     "symptom": "An NZ9/RS4100 driver loads in Composer but an NZ900/RS4200 doesn't respond.",
+     "fix": "Use the model-specific Control4 driver for DLA-NZ900/NZ800/RS4200/RS3200 (listed on the Control4 tech support blog), not the NZ9 driver.",
+     "detail": "JVC changed the handshake password from plain text to a SHA-256 hash (password + 'JVCKWPJ', no trailing space). No c4forums poster confirmed a fix.",
+     "evidence": "vendor",
+     "sources": [
+      "https://c4forums.com/forums/topic/45561-jvc-nz900-rs4200-driver",
+      "https://techsupportblog.control4.com/?p=1345",
+      "https://driverstore.rticontrol.com/driver/jvc-d-ila-projector",
+      "https://community.home-assistant.io/t/jvc-projector-integration-for-nz-series-and-other-2024-models/971690"
+     ]
+    },
+    {
+     "id": "jvc.issue.network-password-must-be-set",
+     "title": "Network password must be set before IP control works",
+     "symptom": "The projector doesn't accept LAN control.",
+     "fix": "Set Function > Network > Network Password (8-10 characters) on the projector and enter the same password in the driver.",
+     "detail": "Control port TCP 20554 (Home Assistant JVC integration doc).",
+     "evidence": "vendor",
+     "sources": [
+      "https://manual3.jvckenwood.com/projector/mobile/dla/b5a-4578-01/GOUMSYcdmflbhj.php",
+      "https://www.home-assistant.io/integrations/jvc_projector/"
+     ]
+    },
+    {
+     "id": "jvc.issue.eco-mode-kills-lan-control",
+     "title": "ECO Mode On kills LAN control in standby",
+     "symptom": "Control4 can't power the projector on from standby; all indicators off.",
+     "fix": "Set Function > ECO Mode > Off.",
+     "detail": "With ECO On the projector also goes to standby after 15 minutes with no signal.",
+     "evidence": "vendor",
+     "sources": [
+      "https://manual3.jvckenwood.com/projector/mobile/dla/b5a-4578-01/GOUMSYcdmflbhj.php"
+     ]
+    },
+    {
+     "id": "jvc.issue.lens-memory-over-ip-use",
+     "title": "Lens memory over IP: use Installation Modes",
+     "symptom": "Lens memory IR codes from older models don't carry over, and the IP driver has no lens-memory command.",
+     "fix": "Store each aspect/lens position in Installation Mode 1-10 and call that mode from a Control4 custom button.",
+     "detail": "Installation Modes also store other settings. Confirmed on an NX5.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/38340-jvc-projector-ip-control-lens-memory-features-custom-buttons-on-c4-remote/"
+     ]
+    },
+    {
+     "id": "jvc.issue.driver-flips-online-offline-ignores",
+     "title": "Driver flips online/offline and ignores power",
+     "symptom": "With the 2016-era Control4 JVC IP driver the projector flips online/offline and ignores power while 'offline', though ping never drops.",
+     "fix": "Go back to the older JVC IP driver (the command set is unchanged).",
+     "detail": "2 posters on OS 2.8.x; no official fix.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/19923-anyone-with-a-2016-jvc-projector-and-using-the-latest-c4-driver-with-problems/"
+     ]
+    },
+    {
+     "id": "jvc.issue.power-off-ignored-just-warm",
+     "title": "Power off ignored just after warm-up; polling closes menus",
+     "symptom": "An off sent just after power-on is ignored, and on-screen menus vanish while the driver polls.",
+     "fix": "Don't send power off within about 30 s of the projector reaching On, and pause polling while someone is in the menus.",
+     "detail": "From RTI's JVC driver doc.",
+     "evidence": "vendor",
+     "sources": [
+      "https://driverstore.rticontrol.com/driver/jvc-d-ila-projector"
+     ]
+    },
+    {
+     "id": "jvc.issue.nz9-rs4100-won-t-power",
+     "title": "NZ9/RS4100 won't power on through Control4 after firmware 2.0",
+     "symptom": "After firmware 2.0 the projector won't power on from Control4.",
+     "fix": "Power down fully, unplug for about a minute, then restart.",
+     "detail": "Advice to disconnect HDMI during the ~1 hour update is unverified hearsay. No confirmed fix.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/41582-jvc-nz9-rs4100-not-working-after-firmware-20/"
+     ]
     }
    ]
   },
@@ -737,6 +1958,123 @@
      "text": "Wire it (Ethernet) and give it a DHCP reservation.",
      "verified": true
     }
+   ],
+   "issues": [
+    {
+     "id": "appletv.issue.tvos-18-broke-control4-ip",
+     "title": "tvOS 18 broke Control4 IP control",
+     "symptom": "Apple TVs on tvOS 18 stopped responding to Control4 remotes and touchscreens; Halo voice failed too.",
+     "fix": "Update every Apple TV to tvOS 18.4 or later, with Apple Bridge driver v78+ and Voice Coordinator v120+.",
+     "detail": "Snap One status: IP fixed in tvOS 18.2 (Dec 2024), voice in 18.4 (Apr 2025). Snap One advised holding tvOS upgrades during incidents.",
+     "evidence": "vendor",
+     "sources": [
+      "https://status.snapone.com/incidents/fm3v9hwhp32j",
+      "https://c4forums.com/forums/topic/46124-apple-tv-ip-control"
+     ]
+    },
+    {
+     "id": "appletv.issue.bind-ir-too-automatic-failover",
+     "title": "Bind IR too, for automatic failover",
+     "symptom": "Apple TV becomes uncontrollable whenever IP/HomeKit control drops.",
+     "fix": "Use the current Control4 Apple TV IP driver and also wire and bind an IR emitter; the driver fails over to IR.",
+     "detail": "Halo voice still needs IP.",
+     "evidence": "vendor",
+     "sources": [
+      "https://news.snapav.com/post/2024-new-apple-tv-driver-update"
+     ]
+    },
+    {
+     "id": "appletv.issue.hc-series-controllers-can-t",
+     "title": "HC-series controllers can't run the IP driver",
+     "symptom": "After a tvOS update an HC800 system loses Apple TV control.",
+     "fix": "Use the IR Apple TV driver on HC controllers, or upgrade to an EA/CA controller for IP.",
+     "detail": "IP driver needs EA-series or CA-10 and OS 2.10.6+.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/topic/32727-psa-apple-tv-tvos-13-killed-my-remote-programming/page/4/",
+      "https://docs.control4.com/docs/product/apple-tv-driver/dealer-quick-start-guide/english/latest/apple-tv-driver-quick-start-guide-rev-c.pdf"
+     ]
+    },
+    {
+     "id": "appletv.issue.control-lost-apple-home-update",
+     "title": "Control lost after an Apple Home update or HomeKit change",
+     "symptom": "Control4 controls the TV and AVR but not the Apple TV; reboots don't help.",
+     "fix": "In Composer run Apple Bridge > Actions > Refresh, then in the Control4 app turn Apple TV Control on and re-add the Control4 bridge in Apple Home.",
+     "detail": "One poster runs the Bridge Refresh from startup programming. OS 3.3.0.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/43977-lost-control-of-appletvs/"
+     ]
+    },
+    {
+     "id": "appletv.issue.sudden-loss-apple-bridge-driver",
+     "title": "Sudden loss after Apple Bridge driver update",
+     "symptom": "Apple TV shows 'Control4 Remote Connected' but ignores the remote.",
+     "fix": "Reboot the Control4 controller.",
+     "detail": "Fixed it for 2 posters after a 2021 bridge update.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/38690-appletv-control-down/"
+     ]
+    },
+    {
+     "id": "appletv.issue.driver-offline-room-blank",
+     "title": "Driver offline or room blank",
+     "symptom": "Apple TV driver offline in Composer, or its selector/room is blank.",
+     "fix": "On the Apple TV remove the AirPlay and HomeKit room, power cycle, reselect the room, then reselect it in the driver.",
+     "detail": "Also check iCloud uses the same Apple ID as the Home app. Dealer support article.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://support-thlproducts.freshdesk.com/support/solutions/articles/73000624106-apple-tv-ip-control-fix",
+      "https://c4forums.com/forums/topic/46124-apple-tv-ip-control"
+     ]
+    },
+    {
+     "id": "appletv.issue.unable-complete-apple-tv-integration",
+     "title": "'Unable to complete Apple TV integration'",
+     "symptom": "The Control4 app fails to enable Apple TV Control, or only some Apple TVs appear.",
+     "fix": "Make sure the Control4 account email matches the Apple ID used for Home, then toggle Apple TV Control off and on.",
+     "detail": "Also: DHCP reservation, hardwire at least one Apple TV, update iOS/tvOS, check for a stale hub in HomeKit. Nothing independently confirmed; some gave up and used IR.",
+     "evidence": "forum-multiple",
+     "sources": [
+      "https://www.c4forums.com/forums/topic/42432-apple-tv-ip-control/",
+      "https://www.c4forums.com/topic/37242-unable-to-complete-apple-tv-integration/"
+     ]
+    },
+    {
+     "id": "appletv.issue.apple-id-password-change-breaks",
+     "title": "Apple ID password change breaks IP control",
+     "symptom": "After an Apple ID password change, Apple TVs stop responding to IP control.",
+     "fix": "Update the credentials on every Apple TV, then remove and re-add the Control4 bridge in Apple Home.",
+     "detail": "Fixed 7 of 8 units in the thread.",
+     "evidence": "forum-single",
+     "sources": [
+      "https://c4forums.com/forums/topic/46124-apple-tv-ip-control"
+     ]
+    },
+    {
+     "id": "appletv.issue.siri-remote-volume-fights-control4",
+     "title": "Siri Remote volume fights Control4 volume",
+     "symptom": "The Siri Remote changes TV/AVR volume outside Control4.",
+     "fix": "Settings > Remotes and Devices > Volume Control: set Off, or match how Control4 drives the AVR (Receiver via IR / Learn New Device).",
+     "detail": "Options: Auto, HDMI, Receiver via IR, TV via IR, Off, Learn New Device.",
+     "evidence": "vendor",
+     "sources": [
+      "https://support.apple.com/guide/tv/control-your-tv-and-volume-atvbbe2477c9/tvos"
+     ]
+    },
+    {
+     "id": "appletv.issue.third-party-driver-without-homekit",
+     "title": "Third-party driver without HomeKit",
+     "symptom": "HomeKit / Apple Bridge pairing keeps breaking.",
+     "fix": "Consider Intrinsic Dev's Apple TV IP driver, which needs no HomeKit pairing.",
+     "detail": "Uses Apple's unofficial protocol, so it's tvOS-version dependent (separate tvOS 16+ driver).",
+     "evidence": "vendor",
+     "sources": [
+      "https://www.intrinsicdev.com/?p=32718",
+      "https://www.c4forums.com/forums/topic/41496-intrinsic-dev-apple-tv-tvos-16-driver-for-control4/"
+     ]
+    }
    ]
   }
  },
@@ -782,5 +2120,6 @@
    "verified": true
   }
  ],
- "task_note": "Each tasks[] item is one action with a stable id (device-key.slug). Ids never change once published; new items get new ids, removed items are dropped. Link a task to a device by site + device IP/MAC + id. verified=false means forum or general knowledge, check on the model."
+ "task_note": "Each tasks[] item is one action with a stable id (device-key.slug). Ids never change once published; new items get new ids, removed items are dropped. Link a task to a device by site + device IP/MAC + id. verified=false means forum or general knowledge, check on the model.",
+ "issues_note": "devices.key.issues[] are known problems from forums and vendor notes, each {id, title, symptom, fix, detail, evidence, sources}. evidence: vendor = manufacturer/Control4/driver vendor doc, forum-multiple = 2+ independent posters, forum-single = one report. Ids are stable like task ids."
 }

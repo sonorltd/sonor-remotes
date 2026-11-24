@@ -189,6 +189,8 @@ table.kv { width: 100%; border-collapse: collapse; } .kv th { text-align: left; 
 .card .dot.on { box-shadow: 0 0 8px var(--ok); }
 @media (max-width: 400px) { .ring { width: 192px; height: 192px; } .r-up, .r-down { left: 64px; } .r-left, .r-right { top: 64px; } .ring .r-ok { left: 50px; top: 50px; width: 90px; height: 90px; } }
 .ipgo { display: inline-grid; place-items: center; width: 20px; height: 20px; margin-left: 4px; border-radius: 5px; border: 1px solid #3a3a3c; color: var(--s-audio, #4bb9d3); text-decoration: none; font-size: 12px; line-height: 1; vertical-align: 1px; } .ipgo:hover { background: rgba(75,185,211,.18); }
+.macro { display: grid; gap: 8px; padding: 10px; border: 1px dashed #48484a; border-radius: 12px; } .macro.teach { border-style: solid; border-color: var(--kc, #4bb9d3); } .macro .big { padding: 12px; font-size: 13px; } .mcount { font-size: 28px; font-weight: 300; text-align: center; font-variant-numeric: tabular-nums; }
+.issues .isq { width: 100%; } details.iss { border-top: 1px solid #2c2c2e; padding: 8px 0 2px; } .fold details.iss summary { cursor: pointer; font: 13px/1.35 var(--font-ui, "DM Sans", system-ui, sans-serif); letter-spacing: 0; text-transform: none; color: var(--text); padding: 2px 0; } .fold details.iss summary::after { content: "›"; } .fold details.iss[open] summary::after { content: "⌄"; } details.iss p { margin: 6px 0; } .ev { font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em; text-transform: uppercase; padding: 1px 6px; border-radius: 99px; border: 1px solid #3a3a3c; white-space: nowrap; } .ev-ok { color: #2fbf71; border-color: rgba(47,191,113,.4); } .ev-mid { color: var(--warn); border-color: rgba(227,167,47,.4); } .ev-low { color: var(--label); }
 </style>
 </head>
 <body>
@@ -227,7 +229,7 @@ table.kv { width: 100%; border-collapse: collapse; } .kv th { text-align: left; 
 </main>
 <div class="toast" id="toast"></div>
 <script>
-const APP_VERSION = '2.4.0';
+const APP_VERSION = '2.4.1';
 if (window.SonorHeader) {
   SonorHeader.init({ appName: 'Remotes', repo: 'sonor-remotes' });
   const v = document.getElementById('nav-version'); if (v) v.textContent = 'v' + APP_VERSION;
@@ -372,18 +374,26 @@ let nm = null; // { pid, devices:[{ ip, mac, label, room, device, service }] }
 const normMac = (m) => { const h = String(m || '').replace(/[^0-9a-f]/gi, '').toUpperCase(); return h.length === 12 ? h.match(/../g).join(':') : ''; };
 function planIp(cfg, d) { const o = String(d.lastOctet || '').trim(); if (!o) return ''; const v = (cfg.vlans || []).find((x) => String(x.id) === String(d.vlan || 1)); const parts = String(cfg.subnet || '192.168.1').split('.'); return v && v.tag !== undefined && v.tag !== '' ? `${parts[0]}.${parts[1]}.${v.tag}.${o}` : `${cfg.subnet}.${o}`; }
 const nmMatch = (d) => nm && (nm.devices.find((p) => p.mac && normMac(d.mac) === p.mac) || nm.devices.find((p) => p.ip && p.ip === d.ip));
+// Shared project (audit step 4): in from ?pid= / sonor_active_project_id, out the same way plus sonor:project-changed
+const ACTIVE_KEY = 'sonor_active_project_id';
+function activeProject() { try { return localStorage.getItem(ACTIVE_KEY) || ''; } catch { return ''; } }
+function setActiveProject(pid) { if (!pid) return; const prev = activeProject(); if (prev === pid) return; try { localStorage.setItem(ACTIVE_KEY, pid); } catch {}
+  document.dispatchEvent(new CustomEvent('sonor:project-changed', { detail: { previousId: prev || null, currentId: pid, project: null, source: 'sky-remote' } })); }
+const followProject = (pid) => { if (pid && pid !== $('#projPick').value && [...$('#projPick').options].some((o) => o.value === pid)) { $('#projPick').value = pid; loadPlan(pid); } };
+document.addEventListener('sonor:project-changed', (e) => { const d = e.detail || {}; if (d.source !== 'sky-remote') followProject(d.currentId); });
+window.addEventListener('storage', (e) => { if (e.key === ACTIVE_KEY) followProject(e.newValue); });
 async function loadProjects() {
   if (DEMO || !SIGNED_IN()) return;
   try {
     const rows = await rest('/network_configs?select=project_id,updated_at,projects(name,ref)&order=updated_at.desc&limit=200');
     if (!rows.length) return;
-    const last = (() => { try { return localStorage.getItem('remotesProject') || ''; } catch { return ''; } })();
+    const last = [qs.get('pid'), activeProject(), (() => { try { return localStorage.getItem('remotesProject') || ''; } catch { return ''; } })()].find((x) => x && rows.some((r) => r.project_id === x)) || '';
     $('#projPick').innerHTML = '<option value="">Project…</option>' + rows.map((r) => `<option value="${esc(r.project_id)}">${esc([r.projects && r.projects.ref, r.projects && r.projects.name].filter(Boolean).join(' · ') || r.project_id)}</option>`).join('');
     $('#projPick').hidden = false; if (last && rows.some((r) => r.project_id === last)) { $('#projPick').value = last; loadPlan(last); }
   } catch { /* not signed in: the remote still works, just without project names */ }
 }
 async function loadPlan(pid) {
-  try { localStorage.setItem('remotesProject', pid || ''); } catch {}
+  try { localStorage.setItem('remotesProject', pid || ''); } catch {} setActiveProject(pid);
   if (!pid) { nm = null; render(); return; }
   try {
     const [row] = await rest(`/network_configs?project_id=eq.${pid}&select=config`); const cfg = (row && row.config) || {};
@@ -492,6 +502,40 @@ function c4Tips(d) {
   const li = (it) => { const t = tk[it.id]; return `<li><label><input type="checkbox" data-chk="${esc(it.id)}" ${t ? 'checked' : ''}><span>${esc(it.text)}${it.verified ? '' : ' <i class="unv">check on the model</i>'}${t && t.by ? `<em>${esc(String(t.by).split('@')[0])} · ${esc(ago(t.at))}</em>` : ''}</span></label></li>`; };
   return `<details class="fold tips"${done && done < items.length ? ' open' : ''}><summary>🎛 Control4 setup · ${done}/${items.length}</summary><div class="foldin"><div class="cbar"><div style="width:${Math.round(100 * done / (items.length || 1))}%"></div></div><ul class="chk">${items.filter((i) => !i.all).map(li).join('')}</ul><div class="sect">Every device</div><ul class="chk">${items.filter((i) => i.all).map(li).join('')}</ul><div class="muted small">${where} Menu names move between model years; the setting to look for is the same.</div>${src}</div></details>`;
 }
+// Sky Q installer macro (Bryn 2026-11-24: "guide > amount of down button presses > 001 > select, own button"):
+// Home, wait for the menu, Down × N to Settings, then 0 0 1 Select. N depends on the box's home menu, so it is taught once
+// once (Guide always resets the menu, so the count is the same on every Sky Q) and remembered.
+const SQ_KEY = () => 'skyqDowns';   // the same on every Sky Q (Bryn: Guide always resets the menu), so one count for all boxes
+const SQ_DEFAULT = null;            // set once the count is known, then nobody needs to teach it
+const sqDowns = () => { try { const v = localStorage.getItem(SQ_KEY()); if (v != null) return Number(v); } catch {} const f = C4_FILE && ((C4_FILE.devices.sky_q || {}).installer || {}).downs; return f != null ? Number(f) : SQ_DEFAULT; };
+let sqTeach = null; // { ip, n }
+const pause = (ms) => new Promise((r) => setTimeout(r, ms));
+async function sendSeq(steps) { for (const [k, gap] of steps) { await send([k]); await pause(gap); } }
+function skyqMacroHtml(d) {
+  const n = sqDowns(d); const t = sqTeach && sqTeach.ip === d.ip;
+  if (t) return `<div class="macro teach"><b>Teaching: press ▼ on the remote until Settings is highlighted</b><div class="mcount">${sqTeach.n} × ▼</div><div class="g g2"><button class="rb sm" id="sqDown">▼ Down</button><button class="rb sm" id="sqUp">▲ Up</button></div><button class="primary" id="sqSave">Settings is highlighted: save and open</button><button id="sqCancel">Cancel</button></div>`;
+  return n != null ? `<div class="macro"><button class="primary big" id="sqRun">▶ Open installer menu</button><div class="muted small">Guide, then ▼ × ${n} to Settings, then 0 0 1 Select. Same on every Sky Q. <a href="#" id="sqReteach">Re-teach</a> if the box's menu changed.</div></div>`
+    : `<div class="macro"><button class="primary big" id="sqTeachGo">Teach the installer button (once)</button><div class="muted small">Presses Guide (which always resets the menu), then you press ▼ until Settings is highlighted. After that it is one button on every Sky Q.</div></div>`;
+}
+function wireSkyq(d) {
+  const go = $('#sqTeachGo'), re = $('#sqReteach'), run = $('#sqRun');
+  const teach = async (e) => { if (e) e.preventDefault(); sqTeach = { ip: d.ip, n: 0 }; lastRemote = ''; render(); await send(['guide']); };
+  if (go) go.onclick = teach; if (re) re.onclick = teach;
+  if (run) run.onclick = async () => { const n = sqDowns(d); run.disabled = true; run.textContent = 'Opening…'; try { await sendSeq([['guide', 2200], ...Array(n).fill(['down', 450]), ['0', 300], ['0', 300], ['1', 300], ['select', 300]]); toast('Installer menu should be open. If not, press Back up and Re-teach.'); } finally { run.disabled = false; run.textContent = '▶ Open installer menu'; } };
+  const dn = $('#sqDown'), up = $('#sqUp'), sv = $('#sqSave'), cx = $('#sqCancel');
+  if (dn) dn.onclick = async () => { sqTeach.n++; $('.mcount').textContent = sqTeach.n + ' × ▼'; await send(['down']); };
+  if (up) up.onclick = async () => { sqTeach.n = Math.max(0, sqTeach.n - 1); $('.mcount').textContent = sqTeach.n + ' × ▼'; await send(['up']); };
+  if (sv) sv.onclick = async () => { try { localStorage.setItem(SQ_KEY(), String(sqTeach.n)); } catch {} sqTeach = null; await sendSeq([['0', 300], ['0', 300], ['1', 300], ['select', 300]]); lastRemote = ''; render(); toast('Saved. Next time it is one button.'); };
+  if (cx) cx.onclick = () => { sqTeach = null; lastRemote = ''; render(); };
+  if (sqTeach && sqTeach.ip === d.ip) { const f = $('#remote details.tips'); if (f) f.open = true; }
+}
+// Known issues per device (c4-tips.json devices.key.issues[], researched from vendor notes and forums): troubleshooting, not ticks
+const EVID = { vendor: ['Maker', 'ok'], 'forum-multiple': ['Forums, several', 'mid'], 'forum-single': ['One forum report', 'low'] };
+function knownIssues(d) {
+  const F = C4_FILE && C4_FILE.devices[fileKey(d)]; const L = (F && F.issues) || []; if (!L.length) return '';
+  return `<details class="fold issues"><summary>⚠ Known issues · ${L.length}</summary><div class="foldin"><input class="isq" placeholder="Search the symptom, e.g. stops responding" data-isq>${L.map((x) => { const e = EVID[x.evidence] || [x.evidence || '', 'low'];
+    return `<details class="iss" data-text="${esc((x.title + ' ' + x.symptom + ' ' + x.fix).toLowerCase())}"><summary><b>${esc(x.title)}</b> <span class="ev ev-${e[1]}">${esc(e[0])}</span></summary><div class="small"><p><span class="muted">Symptom:</span> ${esc(x.symptom || '')}</p><p><span class="muted">Fix:</span> ${esc(x.fix || '')}</p>${x.detail ? `<p class="muted">${esc(x.detail)}</p>` : ''}${(x.sources || []).length ? `<p>${x.sources.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener">source ${i + 1}</a>`).join(' · ')}</p>` : ''}</div></details>`; }).join('')}</div></details>`;
+}
 const skyKind = (d) => (d.driver === 'sky' && d.caps && d.caps.keys.length ? (/\+|hd|drx/i.test(d.model || '') && !/q/i.test(d.model || '') ? 'hd' : 'q') : null);
 function rocker(dn, up, label, live) { return `<div class="rocker">${up}<span class="rlab">${label}${live != null ? `<b>${esc(live)}</b>` : ''}</span>${dn}</div>`; }
 function remoteHtml(d) {
@@ -536,8 +580,8 @@ function remoteHtml(d) {
   } else {                              // TV, Satellite, Streamer
     P.push(inputs, dpad, navHtml, sideBy(vol, ch, mute), slider, trHtml, colours, apps, kind === 'Satellite' ? digits : fold('Number pad', digits), extraHtml);
   }
-  const sk = skyKind(d); const FI = C4_FILE && (C4_FILE.devices[fileKey(d)] || {}).installer; if (FI) { const t = { title: FI.title, steps: (FI.steps || []).map(esc), macro: (FI.codes || []).filter(([k]) => k.split(',').every((x) => /^\d$/.test(x) || c.keys.includes(x))) }; P.push(`<details class="fold tips"><summary>🛠 ${t.title}</summary><div class="foldin"><ol>${t.steps.map((s) => `<li>${s}</li>`).join('')}</ol><div class="g g2">${t.macro.map(([k, l]) => `<button class="rb sm" data-keys="${k}">${l}</button>`).join('')}</div></div></details>`); }
-  P.push(c4Tips(d));
+  const sk = skyKind(d); const FI = C4_FILE && (C4_FILE.devices[fileKey(d)] || {}).installer; if (FI) { const t = { title: FI.title, steps: (FI.steps || []).map(esc), macro: sk === 'q' ? [] : (FI.codes || []).filter(([k]) => k.split(',').every((x) => /^\d$/.test(x) || c.keys.includes(x))) }; const mq = sk === 'q' ? skyqMacroHtml(d) : ''; P.push(`<details class="fold tips"><summary>🛠 ${t.title}</summary><div class="foldin"><ol>${t.steps.map((s) => `<li>${s}</li>`).join('')}</ol>${mq}<div class="g g2">${t.macro.map(([k, l]) => `<button class="rb sm" data-keys="${k}">${l}</button>`).join('')}</div></div></details>`); }
+  P.push(c4Tips(d), knownIssues(d));
   if (c.note && c.keys.length) P.push(`<div class="note">${esc(c.note)}</div>`);
   // details: what it is and how it is reached
   const rows = [['IP', `<code>${esc(d.ip)}</code> ${ipLink(d)}<button class="cp" data-copy="${esc(d.ip)}">Copy</button>`], ['MAC', mac ? `<code>${esc(mac)}</code><button class="cp" data-copy="${esc(mac)}">Copy</button>${!d.mac && plan.mac ? ' <span class="muted">from Network Map</span>' : ''}` : `<span class="muted">not known${has('poweron') ? ': needed to wake it from off' : ''}</span>`], ['Make / model', esc((d.model && d.make && String(d.model).toLowerCase().startsWith(String(d.make).toLowerCase()) ? d.model : [d.make, d.model].filter(Boolean).join(' ')) || '—')], d.firmware && ['Firmware', esc(d.firmware)], d.serial && ['Serial', `<code>${esc(d.serial)}</code>`], d.hardware && ['Hardware', esc(d.hardware)], ['Control', esc(PROTO[d.driver] || d.driver || '—')], ['Feedback', fb.length ? esc(fb.map((f) => FB_LABEL[f] || f).join(', ')) : 'none (one-way)'], plan.label && ['Network Map', esc(plan.label)], c.pairable && ['Pairing', c.paired ? 'paired' : 'not paired']].filter(Boolean);
@@ -561,10 +605,15 @@ function render() {
   if (!d) { if ($('#views').dataset.view === 'remote') setView('list'); return; }
   $('#rCount').textContent = `${(state.devices || []).length} on this network`; $('#remotePanel').style.setProperty('--kc', kc(d.kind));
   const html = remoteHtml(d); if (html === lastRemote) return; lastRemote = html;
-  $('#remote').innerHTML = html; wireRemote(d);
+  const openF = [...$('#remote').querySelectorAll('details')].map((x) => [x.querySelector('summary') ? x.querySelector('summary').textContent.replace(/[\d/·\s]+$/, '') : '', x.open]); const same = $('#remote').dataset.ip === d.ip;
+  $('#remote').innerHTML = html; $('#remote').dataset.ip = d.ip;
+  if (same) $('#remote').querySelectorAll('details').forEach((x) => { const k = x.querySelector('summary') ? x.querySelector('summary').textContent.replace(/[\d/·\s]+$/, '') : ''; const o = openF.find(([kk]) => kk === k); if (o) x.open = o[1]; });
+  wireRemote(d);
 }
 function wireRemote(d) {
   $('#remote').querySelectorAll('[data-k]').forEach((b) => b.onclick = () => { send([b.dataset.k]); if (navigator.vibrate) navigator.vibrate(10); });
+  wireSkyq(d);
+  const isq = $('#remote [data-isq]'); if (isq) isq.oninput = () => { const q = isq.value.trim().toLowerCase(); $('#remote').querySelectorAll('details.iss').forEach((x) => { x.hidden = !!q && !x.dataset.text.includes(q); }); };
   $('#remote').querySelectorAll('[data-chk]').forEach((b) => b.onchange = () => tick(d, b.dataset.chk, b.checked));
   $('#remote').querySelectorAll('[data-keys]').forEach((b) => b.onclick = () => send(b.dataset.keys.split(',')));
   $('#remote').querySelectorAll('[data-copy]').forEach((b) => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); toast('Copied ' + b.dataset.copy); } catch { toast(b.dataset.copy); } });
