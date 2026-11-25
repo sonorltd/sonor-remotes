@@ -1,4 +1,4 @@
-/* sonor-wireless.js v1.3.0 (2026-11-24) — the ONE wireless toolkit for every Sonor app (window.SonorWireless, or require()).
+/* sonor-wireless.js v1.5.0 (2026-11-25) — the ONE wireless toolkit for every Sonor app (window.SonorWireless, or require()).
  * Wi-Fi ↔ Zigbee channel maths, the mesh systems and their maker codes, RF / Zigbee hub guidance, the probe grades,
  * the RF frequencies and the Sonor probe HTTP paths. Used by Network Scanner (page, Pi agent, Android agent) and meant
  * for Takeoffs' wireless planning layer, Site and Remotes, so a channel, a grade or a hub tip means the same everywhere.
@@ -31,6 +31,68 @@ const zbVerdict = (rssi) => (rssi == null ? ['—', ''] : rssi >= ZB_LEVELS.soli
 const ZB_OUI = [[/^00:0F:FF/i, 'c4', 'Control4'], [/^00:17:88/i, 'hue', 'Philips Hue'], [/^EC:1B:BD|^00:0B:57|^90:FD:9F/i, 'other', 'Silicon Labs module']];
 const zbMaker = (m) => { const o = ZB_OUI.find(([re]) => re.test(m.ext || '')); return o ? { sys: o[1], name: o[2] } : null; };
 
+
+
+  // ── Live Wi-Fi channel load (v1.4.0, wifi.mon.*): one scan → how busy each 20 MHz channel is, weighted by signal (rfW) ──
+  const CH24 = Array.from({ length: 13 }, (_, i) => i + 1);
+  const CH5 = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161, 165];
+  const isDfs = (c) => c >= 52 && c <= 144;
+  function span(ch, width, band) {   // the 20 MHz channels one network covers
+    ch = Number(ch); const w = Number(width) || 20;
+    if (band === '2.4 GHz' || ch <= 14) { const lo = w >= 40 ? (ch > 7 ? ch - 6 : ch - 2) : ch - 2; const hi = w >= 40 ? (ch > 7 ? ch + 2 : ch + 6) : ch + 2; return CH24.filter((c) => c >= lo && c <= hi); }
+    const k = Math.max(1, Math.round(w / 20)); const base = ch < 100 ? 36 : ch < 149 ? 100 : 149; const start = base + Math.floor((ch - base) / (4 * k)) * 4 * k;
+    return CH5.filter((c) => c >= start && c < start + 4 * k);
+  }
+  // aps: [{ ch | channel, rssi | signal, width?, band?, ssid, bssid }] → { b24: [{ ch, n, score, lvl, top, co, coTop, ovTop, grade }], b5: [...] }
+  //   co-channel = the network sits on this 20 MHz (wide networks are co-channel on every 20 MHz they cover, wifi.mon.span);
+  //   2.4 GHz neighbours count by spectral-mask overlap (22 − 5n) / 22 for n channels apart (wifi.mon.adjacent); 5 GHz 20 MHz channels don't overlap.
+  //   score = Σ rfW × weight · lvl = 10·log10(score) (display; one network at −85 dBm ≈ 10, at −67 ≈ 28) · top = loudest dBm heard on it
+  //   grade (wifi.mon.grade, wifi.mon.contenders): Clear = no co-channel network ≥ −85 dBm and no overlapping one ≥ −62;
+  //   Crowded = more contenders ≥ −85 than the band allows (2.4: 2, 5: 1), or a co-channel one ≥ −67, or an overlapping one ≥ −62; else Busy.
+  const adjW = (n) => Math.max(0, (22 - 5 * n) / 22);
+  const CONTENDER = { dbm: -85, strong: -67, overlap: -62, limit24: 2, limit5: 1 };
+  function wifiChannelLoad(aps) {
+    const mk = (list) => list.map((ch) => ({ ch, n: 0, score: 0, top: null, dfs: isDfs(ch), co: 0, coTop: null, ovTop: null }));
+    const b24 = mk(CH24), b5 = mk(CH5);
+    for (const a of aps || []) { const ch = Number(a.ch != null ? a.ch : a.channel); const r = a.rssi != null ? a.rssi : a.signal; if (!ch || r == null) continue;
+      const band = a.band || (ch <= 14 ? '2.4 GHz' : '5 GHz'); if (band === '6 GHz') continue; const tbl = band === '2.4 GHz' ? b24 : b5;
+      let wOf;
+      if (band === '2.4 GHz') { const w = Number(a.width) || 20; const lo = w >= 40 ? Math.min(ch, ch > 7 ? ch - 4 : ch + 4) : ch, hi = w >= 40 ? Math.max(ch, ch > 7 ? ch - 4 : ch + 4) : ch;
+        wOf = (c) => (c >= lo && c <= hi ? 1 : adjW(c < lo ? lo - c : c - hi)); }
+      else { const cover = span(ch, a.width, band); wOf = (c) => (cover.includes(c) ? 1 : 0); }
+      for (const t of tbl) { const w = wOf(t.ch); if (!w) continue; t.score += rfW(r) * w; if (t.top == null || r > t.top) t.top = r;
+        if (w === 1) { if (t.ch === ch) t.n += 1; if (r >= CONTENDER.dbm) t.co += 1; if (t.coTop == null || r > t.coTop) t.coTop = r; } else if (t.ovTop == null || r > t.ovTop) t.ovTop = r; } }
+    for (const [tbl, limit] of [[b24, CONTENDER.limit24], [b5, CONTENDER.limit5]]) for (const t of tbl) { t.lvl = t.score > 1 ? Math.round(10 * Math.log10(t.score)) : 0;
+      const ovHot = t.ovTop != null && t.ovTop >= CONTENDER.overlap; t.grade = t.co > limit || (t.coTop != null && t.coTop >= CONTENDER.strong) || ovHot ? 2 : t.co === 0 && !ovHot ? 0 : 1; }
+    return { b24, b5 };
+  }
+  const GRADES = [['Clear', 'ok'], ['Busy', 'warn'], ['Crowded', 'bad']];
+  // lvl-only fallback (no per-network detail): wifi.mon.grade — busy ≥ 10 (one at −85 dBm), crowded ≥ 28 (one at −67)
+  const LOAD_LEVELS = { busy: 10, crowded: 28 };
+  const loadVerdict = (lvl) => (lvl >= LOAD_LEVELS.crowded ? GRADES[2] : lvl >= LOAD_LEVELS.busy ? GRADES[1] : GRADES[0]);
+  // Smoothing (wifi.mon.smoothing): median of the last 5 sightings per BSSID, dropped after 3 missed scans. keep = {} per place, reused.
+  function smoothAps(keep, aps) {
+    const seen = new Set();
+    for (const a of aps || []) { const k = a.bssid || `${a.ssid}|${a.ch}`; seen.add(k); const e = keep[k] = keep[k] || { r: [], miss: 0 }; e.ap = a; e.miss = 0; e.r.push(a.rssi != null ? a.rssi : a.signal); if (e.r.length > 5) e.r.shift(); }
+    for (const [k, e] of Object.entries(keep)) if (!seen.has(k) && ++e.miss >= 3) delete keep[k];
+    return Object.values(keep).map((e) => { const s = e.r.slice().sort((x, y) => x - y); return { ...e.ap, rssi: s[Math.floor(s.length / 2)] }; });
+  }
+  // Whole-site pick from many places at once: the channel whose WORST spot is quietest (2.4 GHz from 1 / 6 / 11; 5 GHz non-DFS first)
+  // wifi.mon.pick: minimax — the channel whose worst place is best (grade first, then lvl), tie-break on the sum over places.
+  // Advise a change only when it beats the current channel's worst place by a grade or 6 dB lvl, held for 10 minutes (the page checks the hold).
+  function sitePick(loads) {
+    const at = (l, band, ch) => (l[band] || []).find((x) => x.ch === ch) || { lvl: 0, grade: 0 };
+    const rate = (band, ch) => { const v = loads.map((l) => at(l, band, ch)); return { ch, worst: Math.max(0, ...v.map((x) => x.lvl)), grade: Math.max(0, ...v.map((x) => x.grade || 0)), sum: v.reduce((a, x) => a + x.lvl, 0), dfs: isDfs(ch) }; };
+    const order = (a, b) => (a.grade - b.grade) || (a.worst - b.worst) || (a.sum - b.sum);
+    return { b24: [1, 6, 11].map((ch) => rate('b24', ch)).sort(order), b5: CH5.map((ch) => rate('b5', ch)).sort((a, b) => (a.dfs - b.dfs) || order(a, b)) };
+  }
+  const betterBy = (cand, cur) => !!cand && !!cur && (cand.grade < cur.grade || cur.worst - cand.worst >= 6);
+
+
+  // ── Node battery (node.battery, node.charger, heuristic): Li-ion 18650, 85 % usable; mV from /info (−1 = USB) ──
+  const BATT = { mAh: 3000, usable: 0.85, mA: { continuous: 130, sampling: 34, probe: 90 } };
+  const battPct = (mv) => (mv == null || mv < 0 ? null : Math.max(0, Math.min(100, Math.round(((mv - 3300) / (4150 - 3300)) * 100))));
+  function battHours(mv, mode) { const p = battPct(mv); if (p == null) return null; const mA = BATT.mA[mode] || BATT.mA.probe; return Math.round((BATT.mAh * BATT.usable * (p / 100)) / mA); }
 
   // ── Zigbee probe energy sweep grades (zbm.grade.energy): max = bursts, median = background ──
   const ZB_ENERGY = { clear: -85, bad: -70, minMarginDb: 10 };
@@ -170,7 +232,18 @@ const rfVerdict = (m, peak) => { if (m == null) return ['—', '']; const p = pe
   //   GET /info → { v, kind, board, caps[], id, name, spot, battery (mV, -1 = USB), ssid, wifiRssi, uptime }
   //   GET /identify → blink 5 s · GET /spot?name=<room or device> → remember where it is (from the Takeoffs room list)
   // The site agent (Pi in the rack or a laptop) finds nodes locally and the page talks to them through it; no cloud table.
-  const NODE = { service: '_sonor-node._tcp', kinds: { rf: 'Sonor RF probe', zigbee: 'Sonor Zigbee probe', ircap: 'IR & RF capture node' },
+  // v1.4.0 (2026-11-25, Bryn: "multi node with all capabilities to place in various areas and monitor the whole environment"):
+  //   kind multi = one Sonor site node whose board decides its caps. Caps: wifi-scan (2.4 GHz) · wifi-scan-5 (ESP32-C5) ·
+  //   zb-scan / zb-energy / zb-meter · rf433-rssi / rf868-rssi · rf433-rx / rf433-tx · ir-rx / ir-tx · sleep (wakes on a timer).
+  //   GET /aps → { v, at, age_ms, band, aps:[{ ssid, bssid, ch, rssi, sec }], stats?:[{ ch, airtime_pct, noise }] } from the node's last
+  //   background scan (never blocks). stats come from nodes that sniff (ESP32-C5): airtime = Σ frame airtimes / dwell (node.wifi.airtime,
+  //   undercounts non-Wi-Fi energy), noise = the radio's noise_floor (node.wifi.measure). Rules: capture-spectrum-node-rules.json (node.*, sp.*).
+  //   GET /spectrum?f0=<MHz>&f1=<MHz>&step=<kHz>&dwell=<µs> (cap rf-sweep, CC1101) → { v:1, at, src:'cc1101', f0:<Hz>, step:<Hz>, n, dbm:[…], floor, peak:{ f, dbm } }
+  //   Firmware: one PlatformIO project, one env per board, radios behind build flags (HAS_IR_RX/TX, HAS_CC1101, HAS_ZB, HAS_WIFI_SCAN) —
+  //   APP - IR RF Capture/firmware (shared with this repo's rf-probe / zb-probe until they fold in).
+  //   (/wifi?ssid=&pass= stays the "join the site Wi-Fi" call on every node.)
+  const NODE = { service: '_sonor-node._tcp', kinds: { rf: 'Sonor RF probe', zigbee: 'Sonor Zigbee probe', ircap: 'IR & RF capture node', multi: 'Sonor site node' },
+    caps: { 'wifi-scan': 'Wi-Fi 2.4 GHz scan', 'wifi-scan-5': 'Wi-Fi 5 GHz scan', 'zb-scan': 'Zigbee mesh scan', 'zb-energy': 'Zigbee energy sweep', 'zb-meter': 'Zigbee meter', 'rf433-rssi': '433 MHz level', 'rf868-rssi': '868 MHz level', 'rf433-rx': '433 MHz capture', 'rf433-tx': '433 MHz send', 'ir-rx': 'IR capture', 'ir-tx': 'IR send', 'rf-sweep': 'sub-GHz spectrum sweep', 'rf868-rx': '868 MHz capture', sleep: 'battery sleep' },
     // per kind: what it can do and which app owns it (kinds stays plain names for labels)
     info: { ircap: { name: 'IR & RF capture node', caps: ['ir-rx', 'ir-tx', 'rf433-rx', 'rf433-tx'], hotspot: 'Sonor-Capture-XXXX', port: 80, app: 'ir-rf', appPort: 8052 } } };
   // HTTP path + timeout for one probe call; the Pi agent, the Android agent and any page use the same table.
@@ -180,6 +253,7 @@ const rfVerdict = (m, peak) => { if (m == null) return ['—', '']; const p = pe
     if (a.op === 'info') return { path: 'info', timeout: 1500 };
     if (a.op === 'identify') return { path: 'identify', timeout: 1500 };
     if (a.op === 'spot') return { path: 'spot?name=' + encodeURIComponent(String(a.spot || '').slice(0, 60)), timeout: 1500 };
+    if (a.op === 'aps') return { path: 'aps', timeout: 4000 };   // v1.4.0 Wi-Fi scan from any node with caps wifi-scan
     if (kind === 'rf') return { path: a.mhz ? 'freq?mhz=' + encodeURIComponent(a.mhz) : 'rssi', timeout: 2000 };
     if (kind === 'zb') { const op = a.op || 'listen'; if (op === 'scan') return { path: 'scan', timeout: 9000 }; if (op === 'energy') return { path: 'energy', timeout: 9000 };
       return { path: 'listen?' + (a.ch ? 'ch=' + Number(a.ch) : '') + (a.reset ? '&reset=1' : ''), timeout: 2000 }; }
@@ -191,8 +265,9 @@ const rfVerdict = (m, peak) => { if (m == null) return ['—', '']; const p = pe
   // Research rules (wifi-rf-rules.json): load once, then API.rules[id] = { text, sources, strength, rule? }
   async function loadRules(url) { try { const r = await fetch(url || 'data/wifi-rf-rules.json'); const j = await r.json(); const list = Array.isArray(j) ? j : j.rules || []; API.rules = Object.fromEntries(list.map((x) => [x.id, x])); } catch (e) { API.rules = API.rules || {}; } return API.rules; }
 
-  const API = { VERSION: '1.3.0', ZB, ZB_C4, zbFreq, wifiFreq24, rfW, zigbeeLoad, ZB_SYS, ZB_LEVELS, zbVerdict, ZB_OUI, zbMaker,
+  const API = { VERSION: '1.5.0', ZB, ZB_C4, zbFreq, wifiFreq24, rfW, zigbeeLoad, ZB_SYS, ZB_LEVELS, zbVerdict, ZB_OUI, zbMaker,
     ZB_ENERGY, energyVerdict, LAN, autoMatch, RF_GUIDE, guideFor, RF_LEVELS, rfVerdict, RF_FREQS, rfFreqFor, PROBES, NODE, probePath, isProbe, probeKindOf, loadRules, rules: {},
-    SYSTEMS, ROLES, RADIO_BUILTIN, radioOf, isRepeater };
+    SYSTEMS, ROLES, RADIO_BUILTIN, radioOf, isRepeater,
+    CH24, CH5, isDfs, wifiSpan: span, wifiChannelLoad, LOAD_LEVELS, loadVerdict, sitePick, GRADES, CONTENDER, adjW, smoothAps, betterBy, BATT, battPct, battHours };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else root.SonorWireless = API;
 })(typeof window !== 'undefined' ? window : globalThis);
