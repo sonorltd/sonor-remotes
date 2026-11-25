@@ -1,4 +1,4 @@
-# Remotes (Sonor) · v2.4.1
+# Remotes (Sonor) · v2.4.2
 
 Finds controllable AV kit on the site network (Sky, Denon / Marantz, Yamaha, Onkyo / Pioneer, LG, Samsung, Sony, Roku, Sonos,
 PJLink and JVC projectors) and gives each one a remote with only the buttons it supports. Opens on **Discovered**: every device
@@ -15,6 +15,10 @@ Two ways to use the same page:
 - **Hosted:** `https://apps.sonor.co.uk/sonor-remotes/` (Cloudflare login like every Sonor app). Pick a bridge from the list; commands go through Supabase (`sky_commands`) to the bridge, which makes only outbound HTTPS calls, so nothing needs opening on the site router. About half a second per key press.
 
 A browser can't open the TCP connection a Sky box needs, so a bridge on site always does the actual talking.
+
+
+## v2.4.2 (2026-11-25)
+- The shared Sonor project bar replaces the toolbar's own project list (projects with a Network Map plan marked "network plan"). Offline on site the plain picker takes over.
 
 ## v2.4.0 (2026-11-24)
 - **Handset look, per kind of device**: TVs, Sky and streamers get the D-pad ring, rockers and transport; receivers open on a big volume readout with inputs and sound modes (setup menu folded away); projectors show only power, inputs and picture mute; Sonos shows play controls and volume. Only keys the driver really has are drawn.

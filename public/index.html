@@ -15,6 +15,11 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
 <script src="./data/sonor-brand.js"></script>
 <script src="./data/sonor-header.js"></script>
+<!-- the ONE project selector every Sonor app shows (SonorProjectBar); offline on site the plain picker in the toolbar takes over -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="./data/sonor-project-bus.js"></script>
+<script src="./data/sonor-project-list.js"></script>
+<script src="./data/sonor-project-bar.js"></script>
 <script src="./data/sonor-app-auth.js"></script>  <!-- Android app: signs in as the engineer (gateway v1.17.0) -->
 <script src="./native.js"></script>
 <script src="./data/brands.js"></script>  <!-- maker marks (Simple Icons, CC0) -->  <!-- phone app only: direct TCP to the boxes -->
@@ -195,6 +200,7 @@ table.kv { width: 100%; border-collapse: collapse; } .kv th { text-align: left; 
 </head>
 <body>
 <div id="sonor-header"></div>
+<div id="sonorProjectBarHost"></div>
 <div class="toolbar">
   <select id="bridgePick" hidden title="Which site's bridge (Pi) to use"></select>
   <button id="appSign" hidden title="Sign in with your Sonor email, the same login as apps.sonor.co.uk on the Mac"></button>
@@ -229,7 +235,7 @@ table.kv { width: 100%; border-collapse: collapse; } .kv th { text-align: left; 
 </main>
 <div class="toast" id="toast"></div>
 <script>
-const APP_VERSION = '2.4.1';
+const APP_VERSION = '2.4.2';
 if (window.SonorHeader) {
   SonorHeader.init({ appName: 'Remotes', repo: 'sonor-remotes' });
   const v = document.getElementById('nav-version'); if (v) v.textContent = 'v' + APP_VERSION;
@@ -380,12 +386,24 @@ function activeProject() { try { return localStorage.getItem(ACTIVE_KEY) || ''; 
 function setActiveProject(pid) { if (!pid) return; const prev = activeProject(); if (prev === pid) return; try { localStorage.setItem(ACTIVE_KEY, pid); } catch {}
   document.dispatchEvent(new CustomEvent('sonor:project-changed', { detail: { previousId: prev || null, currentId: pid, project: null, source: 'sky-remote' } })); }
 const followProject = (pid) => { if (pid && pid !== $('#projPick').value && [...$('#projPick').options].some((o) => o.value === pid)) { $('#projPick').value = pid; loadPlan(pid); } };
-document.addEventListener('sonor:project-changed', (e) => { const d = e.detail || {}; if (d.source !== 'sky-remote') followProject(d.currentId); });
-window.addEventListener('storage', (e) => { if (e.key === ACTIVE_KEY) followProject(e.newValue); });
+document.addEventListener('sonor:project-changed', (e) => { const d = e.detail || {}; if (!BAR && d.source !== 'sky-remote') followProject(d.currentId); });
+window.addEventListener('storage', (e) => { if (!BAR && e.key === ACTIVE_KEY) followProject(e.newValue); });
+let BAR = false, planIds = new Set();   // BAR: the shared SonorProjectBar picks the project; planIds = projects with a Network Map plan
 async function loadProjects() {
   if (DEMO || !SIGNED_IN()) return;
   try {
     const rows = await rest('/network_configs?select=project_id,updated_at,projects(name,ref)&order=updated_at.desc&limit=200');
+    planIds = new Set(rows.map((r) => r.project_id));
+    if (window.SonorProjectBar && window.supabase && window.supabase.createClient) {
+      if (BAR) return SonorProjectBar.refresh();
+      BAR = true; $('#projPick').hidden = true;
+      const authFetch = async (u, o = {}) => { const h = new Headers(o.headers || {}); if (AUTH.active) Object.entries(await AUTH.headers()).forEach(([k, v]) => h.set(k, v)); return fetch(u, { ...o, headers: h }); };
+      const supa = window.supabase.createClient(SB_URL, SB_ANON, { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: authFetch } });
+      try {
+        await SonorProjectBar.init({ supa, appKey: 'sky-remote', wqBar: false, host: $('#sonorProjectBarHost'), decorateOption: (p) => (p && planIds.has(p.id) ? { suffix: ' · network plan', title: 'Device names and rooms come from its Network Map plan' } : ''), onChange: (d) => loadPlan((d && d.currentId) || '') });
+        const id = qs.get('pid') || SonorProjectBar.getActiveId(); if (id) loadPlan(id); return;
+      } catch { BAR = false; }
+    }
     if (!rows.length) return;
     const last = [qs.get('pid'), activeProject(), (() => { try { return localStorage.getItem('remotesProject') || ''; } catch { return ''; } })()].find((x) => x && rows.some((r) => r.project_id === x)) || '';
     $('#projPick').innerHTML = '<option value="">Project…</option>' + rows.map((r) => `<option value="${esc(r.project_id)}">${esc([r.projects && r.projects.ref, r.projects && r.projects.name].filter(Boolean).join(' · ') || r.project_id)}</option>`).join('');
@@ -393,7 +411,7 @@ async function loadProjects() {
   } catch { /* not signed in: the remote still works, just without project names */ }
 }
 async function loadPlan(pid) {
-  try { localStorage.setItem('remotesProject', pid || ''); } catch {} setActiveProject(pid);
+  try { localStorage.setItem('remotesProject', pid || ''); } catch {} if (!BAR) setActiveProject(pid);
   if (!pid) { nm = null; render(); return; }
   try {
     const [row] = await rest(`/network_configs?project_id=eq.${pid}&select=config`); const cfg = (row && row.config) || {};

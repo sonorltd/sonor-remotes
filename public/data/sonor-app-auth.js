@@ -1,4 +1,10 @@
-/* sonor-app-auth.js — site tablet apps sign in AS THE PERSON (v1.0.0, 2026-11-24)
+/* sonor-app-auth.js — site tablet apps sign in AS THE PERSON (v1.1.0, 2026-11-25; was v1.0.0, 2026-11-24)
+ * 1.1.0 (Sonor: "auto logged in based on the tablets main google login … for all current and future apps"):
+ *   the app signs itself in with the tablet's own Google Workspace account — no screen, no code. SonorAuth.googleSignIn()
+ *   (Android Credential Manager) → Google ID token → sonor-session edge function → the person's own Supabase session.
+ *   Runs on its own at init when signed out; signIn() tries it first. Falls back to the browser email-code route when the tablet
+ *   has no Sonor Google account, the person is set to "email code only" in Hub → Users, or the app is an older build.
+ *   New app: copy-shared.sh + an Android OAuth client (package + signing SHA-1) in Cloud project sonor-play-publish.
  * Master: APP - Android Apps/shared/sonor-app-auth.js → copied to each app's public/data/ (bash shared/copy-shared.sh;
  * registry-check.sh flags a copy that drifts).
  * Bryn: "androind apps should sync with all data whereever it is done and logged in user tracking".
@@ -23,6 +29,8 @@
   var SB = 'https://ysmvklstkzodlocttspy.supabase.co';
   var ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzbXZrbHN0a3pvZGxvY3R0c3B5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Njc0OTMsImV4cCI6MjA4OTM0MzQ5M30.08kRS_dtbwz0rSYezNGMJHnOU_st8GKZseQPefcMEMc';
   var GATE = 'https://apps.sonor.co.uk/__sonor/app-login';
+  var SESSION_FN = SB + '/functions/v1/sonor-session';
+  var GOOGLE_CLIENT = '390794440318-gnoo0asc53uhp1o7c3ga5dc096fpom2f.apps.googleusercontent.com';   // Web client, project sonor-play-publish (public id)
   var KEY = 'sonor-app-session', app = '', subs = [], refreshing = null;
   var cap = root.Capacitor;
   var active = !!(cap && cap.isNativePlatform && cap.isNativePlatform()) && !/(^|\.)sonor\.co\.uk$/.test(root.location.hostname);
@@ -42,6 +50,21 @@
     var j = await r.json(); var n = { email: s.email, access_token: j.access_token, refresh_token: j.refresh_token || s.refresh_token, expires_at: j.expires_at || (Math.floor(Date.now() / 1000) + (j.expires_in || 3600)) };
     save(n); return n;
   }
+  // 1.1.0 — sign in with the tablet's Google account. Resolves true when signed in; false (quietly) when not possible.
+  async function google(quiet) {
+    var P = (cap && cap.Plugins) || {}; var p = P.SonorAuth;
+    if (!p || !p.googleSignIn) return false;
+    try {
+      var g = await p.googleSignIn({ clientId: GOOGLE_CLIENT });
+      if (!g || !g.idToken) return false;
+      var r = await fetch(SESSION_FN, { method: 'POST', headers: { apikey: ANON, Authorization: 'Bearer ' + ANON, 'Content-Type': 'application/json' }, body: JSON.stringify({ google_id_token: g.idToken }) });
+      var j = await r.json().catch(function () { return null; });
+      if (!r.ok || !j || !j.access_token) { api.lastError = (j && j.message) || ('sign-in ' + r.status); return false; }
+      save({ email: j.email || g.email || '', access_token: j.access_token, refresh_token: j.refresh_token || '', expires_at: Number(j.expires_at) || 0, via: 'google' });
+      root.dispatchEvent(new Event('sonorauth-done'));
+      return true;
+    } catch (e) { api.lastError = (e && e.message) || String(e); if (!quiet) console.warn('Google sign-in', api.lastError); return false; }
+  }
   async function current() {
     var s = load(); if (!s) return null;
     if (s.expires_at && s.expires_at - 120 < Date.now() / 1000) { if (!refreshing) refreshing = refresh(s).catch(function () { return s; }).finally(function () { refreshing = null; }); s = await refreshing; }
@@ -54,7 +77,8 @@
       if (!active) return api;
       root.addEventListener('sonorauth', function (e) { if (fromLink(e && e.detail && e.detail.url)) root.dispatchEvent(new Event('sonorauth-done')); });
       var P = cap.Plugins || {}; var p = P.SonorAuth;   // a cold start by the sign-in link: the app kept the link for us
-      if (p && p.takeAuth) p.takeAuth().then(function (r) { if (r && r.url) fromLink(r.url); }).catch(function () { });
+      var took = (p && p.takeAuth) ? p.takeAuth().then(function (r) { return !!(r && r.url && fromLink(r.url)); }).catch(function () { return false; }) : Promise.resolve(false);
+      if (!(o && o.auto === false)) took.then(function (done) { if (!done && !load()) google(true); });   // 1.1.0 — signed out: use the tablet's Google account
       return api;
     },
     user: function () { var s = load(); return s ? { email: s.email } : null; },
@@ -63,9 +87,14 @@
       var s = await current(); if (!s) return {};
       var h = { Authorization: 'Bearer ' + s.access_token }; if (s.email) h['x-sonor-user'] = s.email; if (app) h['x-sonor-app'] = app; return h;
     },
-    signIn: function () { var u = GATE + '?app=' + encodeURIComponent(app); var P = (cap && cap.Plugins) || {}; var p = P.SonorAuth; if (p && p.openBrowser) p.openBrowser({ url: u }); else root.open(u, '_system'); },
+    signIn: async function () {   // 1.1.0 — the tablet's Google account first, then the browser email-code route
+      if (active && await google(false)) return true;
+      api.signInBrowser(); return false;
+    },
+    signInBrowser: function () { var u = GATE + '?app=' + encodeURIComponent(app); var P = (cap && cap.Plugins) || {}; var p = P.SonorAuth; if (p && p.openBrowser) p.openBrowser({ url: u }); else root.open(u, '_system'); },
     signOut: function () { save(null); },
     onChange: function (f) { subs.push(f); },
+    lastError: '',
     _fromLink: fromLink,
   };
   root.SonorAppAuth = api;
