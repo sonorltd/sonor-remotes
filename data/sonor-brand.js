@@ -107,7 +107,7 @@ window.__SONOR_BRAND__ = {
       'music-pi':    '../APP - Music Pi/public/index.html',   // on site: http://sonor-music.local:8054
       'android-apps': '../APP - Android Apps/index.html',   // web demos of every Android app
       'artnet-tester': '../APP - Android Apps/artnet/web/index.html',   // Art-Net Tester (Android, uk.co.sonor.artnet); web page = demo only (a browser can't send UDP)
-      'engineer-toolkit': '../APP - Android Apps/toolkit/web/index.html',   // Engineer Toolkit (Android, uk.co.sonor.toolkit): Terminal; web page = demo + Web Serial
+      'engineer-toolkit': '../APP - Android Apps/toolkit/web/index.html',   // Terminal (Android, uk.co.sonor.toolkit, was Engineer Toolkit); web page = demo + Web Serial
       'sonor-home': '../APP - Android Apps/home/web/index.html',   // Sonor Home (Android, uk.co.sonor.home): the site tablets' launcher; web page = demo
       rams:        '../APP - RAMS Generator/sonor-rams-generator.html',
       leads:       '../APP - Leads/dashboard/sonor-leads.html',
