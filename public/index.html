@@ -8,17 +8,17 @@
 <title>Remotes · Sonor</title>
 <link rel="icon" type="image/svg+xml" href="./data/favicon.svg">
 <script src="data/sonor-theme.js"></script>  <!-- sonor-platform §2: theme FIRST (graphite default) -->
-<link rel="stylesheet" href="./data/brand.css">
+<link rel="stylesheet" href="../../sonor-shared/v1/brand.css" data-fallback="./data/brand.css" onerror="this.onerror=null;this.href=this.dataset.fallback">
 <script type="module" src="https://apps.sonor.co.uk/sonor-kit/v1/kit.js"></script>  <!-- sonor-platform §1: served kit (page still works offline on site) -->
-<link rel="stylesheet" href="./data/sonor-header.css">
+<link rel="stylesheet" href="../../sonor-shared/v1/sonor-header.css" data-fallback="./data/sonor-header.css" onerror="this.onerror=null;this.href=this.dataset.fallback">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
-<script src="./data/sonor-brand.js"></script>
-<script src="./data/sonor-header.js"></script>
+<script src="../../sonor-shared/v1/sonor-brand.js" data-fallback="./data/sonor-brand.js" onerror="document.write(unescape('%3Cscript src=%22'+this.dataset.fallback+'%22%3E%3C/script%3E'))"></script>
+<script src="../../sonor-shared/v1/sonor-header.js" data-fallback="./data/sonor-header.js" onerror="document.write(unescape('%3Cscript src=%22'+this.dataset.fallback+'%22%3E%3C/script%3E'))"></script>
 <!-- the ONE project selector every Sonor app shows (SonorProjectBar); offline on site the plain picker in the toolbar takes over -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="./data/sonor-project-bus.js"></script>
-<script src="./data/sonor-project-list.js"></script>
+<script src="../../sonor-shared/v1/sonor-project-bus.js" data-fallback="./data/sonor-project-bus.js" onerror="document.write(unescape('%3Cscript src=%22'+this.dataset.fallback+'%22%3E%3C/script%3E'))"></script>
+<script src="../../sonor-shared/v1/sonor-project-list.js" data-fallback="./data/sonor-project-list.js" onerror="document.write(unescape('%3Cscript src=%22'+this.dataset.fallback+'%22%3E%3C/script%3E'))"></script>
 <script src="./data/sonor-project-bar.js"></script>
 <script src="./data/sonor-app-auth.js"></script>  <!-- Android app: signs in as the engineer (gateway v1.17.0) -->
 <script src="./native.js"></script>
